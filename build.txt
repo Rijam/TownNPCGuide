@@ -1,0 +1,7 @@
+displayName = Town NPC Guide
+author = Rijam
+version = 1.0
+homepage = https://github.com/Rijam/TownNPCGuide/wiki
+hideCode = false
+hideResources = false
+includeSource = true

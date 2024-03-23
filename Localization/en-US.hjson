@@ -1,0 +1,113 @@
+Mods: {
+	TownNPCGuide: {
+		NPCs: {
+			TutorialTownNPC: {
+				DisplayName: Tutorial Town NPC
+				Census.SpawnCondition: Rescue on the surface. Lives in the Hallow.
+
+				TownNPCMood: {
+					# Content will display when there is nothing else to display.
+					Content: I'm neutral.
+					# NoHome will display when the Town NPC is homeless.
+					NoHome: I would a like a home for myself.
+					# LoveSpace will display when they get the Solitude Bonus. Check the vanilla wiki for on details on that.
+					LoveSpace: Great solitude.
+					# FarFromHome will display when the Town NPC is far from their house. TOTO: find the exact distance.
+					FarFromHome: I seem to be far away from my home!
+					# DislikeCrowded will display when there are 4-6 other Town NPCs within 25 tiles.
+					DislikeCrowded: It's getting a little crowded in here.
+					# HateCrowded will display when there are 7+ other Town NPCs wihtin 25 tiles.
+					HateCrowded: There's no privacy at all!
+					# LoveBiome, LikeBiome, DislikeBiome, HateBiome will display when in any of the loved, liked, disliked, and hated biomes.
+					# The Corruption, Crimson, and Dungeon are automatically set as hated biomes.
+					LoveBiome: I love {BiomeName}! It's so beautiful!
+					LikeBiome: The {BiomeName} is a good place to live.
+					DislikeBiome: I don't really enjoy living in {BiomeName}.
+					HateBiome: I hate {BiomeName}!
+					# LoveNPC, LikeNPC, DislikeNPC, HateNPC will display when in any of the loved, liked, disliked, and hated Town NPCs are nearby.
+					# LikeNPC_Princess will display for when the Princess is nearby. This ONLY works for the Princess. It will not work for any other Town NPC.
+					LoveNPC: "{NPCName} teaches people. I love that about them."
+					LikeNPC: "{NPCName} is fun to be around."
+					LikeNPC_Princess: "{NPCName} is so kind! They like everyone!"
+					DislikeNPC: I have to tolerate {NPCName}.
+					HateNPC: I hate {NPCName}!
+					# This will set the Princess' dialogue for your Town NPC. This ONLY works for the Princess. It will not work for any other Town NPC.
+					Princess_LovesNPC: I love {NPCName}'s work!
+				}
+
+				Dialogue: {
+					StandardDialogue1: Hello!
+					StandardDialogue2: Reading up on those tutorials I see!
+					StandardDialogue3: All this coding is confusing...
+					StandardDialogue4: Have you met my buddy Example Person?
+					PlayerHasTerraToilet: Ah, a throne fit for a king!
+					DesertDialogue: Do you have extra water? It sure is hot in the desert.
+					# {0} and {1} are place holders which will be replaced by other text.
+					AnglerDialogue: It seems like everyone has a different opinion about {0}.
+					DownedMoonLord: Congrats {0}! You've defeated Moon Lord in {1}!
+					ExamplePerson: "{0} is my good friend. If you have any questions about modding, they can sure help you!"
+					OnTeleportToStatue: Woah!
+					SecondButtonChat: Yo!
+					OnRescue: Hey! Thanks for saving me!
+					VirtualCurrencyBalance: You balance for Virutal Currency is {0}. Speak with me to gain one each time!
+				}
+
+				UI.SecondButton: Hi there!
+				Bestiary: This NPC is here to teach all about creating your own Town NPCs!
+			}
+
+			BoundTutorialTownNPC.DisplayName: Bound Tutorial Town NPC
+
+			TutorialTownPet: {
+				DisplayName: Tutorial Town Pet
+				Census.SpawnCondition: Use a Tutorial Town Pet License
+				UI.LicenseTutorialTownPetUse: The license teleports away to the Tutorial Town Pet delivery service...
+				Bestiary: A cute Tutorial Town Pet. Everyone's favorite species of pet!
+			}
+		}
+
+		Conditions: {
+			JungleOrDownedQueenBee: When in the Jungle or after Queen Bee has been defeated
+			TravelingMerchantPresentOrHardmode: When the Traveling Merchant is present or in Hardmode
+		}
+
+		Items: {
+			TutorialItem: {
+				DisplayName: Tutorial Item
+				Tooltip: ""
+			}
+
+			TutorialTownPetLicense: {
+				DisplayName: Tutorial Town Pet License
+				Tooltip:
+					'''
+					Use to adopt a Tutorial Town Pet for your town
+					Already have a Tutorial Town Pet?
+					Use additional licenses to activate the Pet Exchange Program!
+					Find the perfect fit for you and your Tutorial Town Pet!
+					'''
+			}
+
+			TutorialCurrencyCoin: {
+				DisplayName: Tutorial Currency Coin
+				Tooltip: Currency for trading with Tutorial Town NPC
+			}
+		}
+
+		Emotes.TutorialTownNPCEmote.Command: tnpcgtutorialtownnpc
+
+		Currency: {
+			TutorialCurrency: Tutorial Currency Coins
+			VanillaItemAsCurrency: Vertebrae
+			VirtualCurrency: Virtual Currency
+		}
+	}
+}
+
+# The following shouldn't be necessary if you use Princess_LovesNPC
+
+# This will set the Princess' dialogue for your Town NPC.
+# You will need to change the name of your mod and name of your Town NPC for this to work.
+# TownNPCMood_Princess.LoveNPC_YourModHere/YourTownNPCHere
+# This key must be outside of the Mods.YourMod scope.
+TownNPCMood_Princess.LoveNPC_TownNPCGuide/TutorialTownNPC: "{$Mods.TownNPCGuide.NPCs.TutorialTownNPC.TownNPCMood.Princess_LovesNPC}"

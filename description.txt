@@ -1,0 +1,5 @@
+Town NPC Guide is a mod created as part of Rijam's Town NPC Guide.
+
+Read the guide here: https://github.com/Rijam/TownNPCGuide/wiki
+
+This mod does not do much on its own. It is meant as a learning tool for creating Town NPCs like Example Mod.
