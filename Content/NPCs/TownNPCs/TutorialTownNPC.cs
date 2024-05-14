@@ -92,7 +92,6 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs
 				// All Town NPCs are automatically set to like the Princess.
 			; // < Mind the semicolon!
 
-			
 			// This creates a "profile" for our Town NPC, which allows for different textures during a party and/or while the NPC is shimmered.
 			NPCProfile = new Profiles.StackedNPCProfile(
 				new Profiles.DefaultNPCProfile(Texture, NPCHeadLoader.GetHeadSlot(HeadTexture), Texture + "_Party"),
@@ -798,39 +797,47 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs
 
 	// Defining our own Town NPC Profile gives us a little more freedom, but is rarely needed.
 	public class TutorialTownNPCProfile : ITownNPCProfile {
-		public int RollVariation() => 0;
+		public int RollVariation() => 0; // Used if our NPC has different variants like the Town Pets do.
 
 		// If your Town NPC has no random names, return null here.
 		public string GetNameForVariant(NPC npc) => npc.getNewNPCName();
+
+		// Load of all our textures. Doing it this way will only load them once during mod load time.
+		private readonly Asset<Texture2D> bestiaryTexture = ModContent.Request<Texture2D>("TownNPCGuide/Content/NPCs/TownNPCs/Advanced/TutorialTownNPC_BestiaryExample");
+		private readonly Asset<Texture2D> shimmeredAndParty = ModContent.Request<Texture2D>("TownNPCGuide/Content/NPCs/TownNPCs/TutorialTownNPC_Shimmer_Party");
+		private readonly Asset<Texture2D> shimmeredAndNotParty = ModContent.Request<Texture2D>("TownNPCGuide/Content/NPCs/TownNPCs/TutorialTownNPC_Shimmer");
+		private readonly Asset<Texture2D> notShimmeredAndParty = ModContent.Request<Texture2D>("TownNPCGuide/Content/NPCs/TownNPCs/TutorialTownNPC_Party");
+		private readonly Asset<Texture2D> notShimmeredAndNotParty = ModContent.Request<Texture2D>("TownNPCGuide/Content/NPCs/TownNPCs/TutorialTownNPC");
+		private readonly int headSlot = ModContent.GetModHeadSlot("TownNPCGuide/Content/NPCs/TownNPCs/TutorialTownNPC_Head");
 
 		public Asset<Texture2D> GetTextureNPCShouldUse(NPC npc) {
 			// Here we can give our Town NPC a bunch of different textures if we wanted.
 			// For example, we can make the texture in the Bestiary different.
 			if (npc.IsABestiaryIconDummy && !npc.ForcePartyHatOn) {
-				return ModContent.Request<Texture2D>("TownNPCGuide/Content/NPCs/TownNPCs/Advanced/TutorialTownNPC_BestiaryExample");
+				return bestiaryTexture;
 			}
 
 			// Shimmered and party
 			if (npc.IsShimmerVariant && npc.altTexture == 1) {
-				return ModContent.Request<Texture2D>("TownNPCGuide/Content/NPCs/TownNPCs/TutorialTownNPC_Shimmer_Party");
+				return shimmeredAndParty;
 			}
 			// Shimmered and no party
 			if (npc.IsShimmerVariant && npc.altTexture != 1) {
-				return ModContent.Request<Texture2D>("TownNPCGuide/Content/NPCs/TownNPCs/TutorialTownNPC_Shimmer");
+				return shimmeredAndNotParty;
 			}
 			// Not shimmered and party
 			if (!npc.IsShimmerVariant && npc.altTexture == 1) {
-				return ModContent.Request<Texture2D>("TownNPCGuide/Content/NPCs/TownNPCs/TutorialTownNPC_Party");
+				return notShimmeredAndParty;
 			}
 			// Not shimmered and no party
-			return ModContent.Request<Texture2D>("TownNPCGuide/Content/NPCs/TownNPCs/TutorialTownNPC");
+			return notShimmeredAndNotParty;
 		}
 
 		public int GetHeadTextureIndex(NPC npc) {
 			if (npc.IsShimmerVariant) {
 				return TutorialTownNPC.ShimmerHeadIndex;
 			}
-			return ModContent.GetModHeadSlot("TownNPCGuide/Content/NPCs/TownNPCs/TutorialTownNPC_Head");
+			return headSlot;
 		}
 
 		// In our Town NPC's class, we'll need to change a few things:
