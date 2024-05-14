@@ -64,6 +64,19 @@ Mods: {
 				UI.LicenseTutorialTownPetUse: The license teleports away to the Tutorial Town Pet delivery service...
 				Bestiary: A cute Tutorial Town Pet. Everyone's favorite species of pet!
 			}
+
+			Guide.Dialogue.ModdedDialogue: Hi there, hello! This line was added by Town NPC Guide!
+			Nurse.Dialogue.ModdedDialogue: Hi there, hello! This line was added by Town NPC Guide!
+			ArmsDealer.Dialogue.TutorialTownNPCPresent: "{0} looks like one of those target dummies."
+			Dryad.Dialogue.Shimmered: "{0} is {1}% Corruption and {2}% Crimson. Clense this world before it changes you!"
+
+			Steampunker: {
+				Dialogue: {
+					Standard1: I have a factory that builds factories for me.
+					Standard2: If you don't have any brass I'll settle for bronze.
+					Standard3: It is very important that you know the difference between a cog, gear, and a sprocket!
+				}
+			}
 		}
 
 		Conditions: {

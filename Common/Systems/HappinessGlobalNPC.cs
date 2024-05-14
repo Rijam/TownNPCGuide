@@ -1,9 +1,10 @@
 using Terraria;
-using Terraria.GameContent.Personalities;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.GameContent.Personalities;
+using TownNPCGuide.Content.NPCs.TownNPCs;
 
-namespace TownNPCGuide.Content.NPCs.TownNPCs
+namespace TownNPCGuide.Common.Systems
 {
 	public class HappinessGlobalNPC : GlobalNPC {
 		public override void SetStaticDefaults() {
