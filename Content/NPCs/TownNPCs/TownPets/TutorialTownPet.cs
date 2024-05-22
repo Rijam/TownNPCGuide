@@ -162,11 +162,16 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TownPets
 
 	public class TutorialTownPetProfile : ITownNPCProfile
 	{
-		// Some helper strings so we don't have to type the same things multiple times.
-		// This assumes that your name this class the class name of your Town NPC + Profile.
-		private string Namespace => GetType().Namespace.Replace('.', '/');
-		private string NPCName => (GetType().Name.Split("Profile")[0]).Replace('.', '/');
-		private string FilePath => (Namespace + "/" + NPCName);
+		private static readonly string filePath = "TownNPCGuide/Content/NPCs/TownNPCs/TownPets/TutorialTownPet";
+
+		// Load all of our textures only one time during mod load time.
+		private readonly Asset<Texture2D> variant0 = ModContent.Request<Texture2D>(filePath);
+		private readonly Asset<Texture2D> variant1 = ModContent.Request<Texture2D>($"{filePath}_1");
+		private readonly Asset<Texture2D> variant2 = ModContent.Request<Texture2D>($"{filePath}_2");
+		private readonly Asset<Texture2D> variant3 = ModContent.Request<Texture2D>($"{filePath}_3");
+		private readonly Asset<Texture2D> variant4 = ModContent.Request<Texture2D>($"{filePath}_4");
+		private readonly int headIndex0 = ModContent.GetModHeadSlot($"{filePath}_Head");
+
 
 		public int RollVariation()
 		{
@@ -185,19 +190,27 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TownPets
 
 		public Asset<Texture2D> GetTextureNPCShouldUse(NPC npc)
 		{
-			return ModContent.Request<Texture2D>(FilePath + "_" + npc.townNpcVariationIndex);
+			return npc.townNpcVariationIndex switch
+			{
+				0 => variant0,
+				1 => variant1, // Will be the Shimmered variant if your NPC has a shimmer variant.
+				2 => variant2,
+				3 => variant3,
+				4 => variant4,
+				_ => variant0
+			};
 		}
 
 		public int GetHeadTextureIndex(NPC npc)
 		{
 			return npc.townNpcVariationIndex switch
 			{
-				0 => ModContent.GetModHeadSlot(FilePath + "_Head"),
+				0 => headIndex0,
 				1 => TutorialTownPet.HeadIndex1, // Will be the Shimmered variant if your NPC has a shimmer variant.
 				2 => TutorialTownPet.HeadIndex2,
 				3 => TutorialTownPet.HeadIndex3,
 				4 => TutorialTownPet.HeadIndex4,
-				_ => ModContent.GetModHeadSlot(FilePath + "_Head")
+				_ => headIndex0
 			};
 		}
 	}
