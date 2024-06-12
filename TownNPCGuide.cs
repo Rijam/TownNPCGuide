@@ -1,15 +1,14 @@
+using System.IO;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
 using Terraria;
 using Terraria.ID;
-using Terraria.Localization;
 using Terraria.ModLoader;
-using TownNPCGuide.Content.NPCs.TownNPCs;
-using System.IO;
+using Terraria.GameContent.UI;
 using TownNPCGuide.Content.Items;
 using TownNPCGuide.Content.NPCs.TownNPCs.TownPets;
 using TownNPCGuide.Content.Currencies;
-using Terraria.GameContent.UI;
-using ReLogic.Content;
-using Microsoft.Xna.Framework.Graphics;
+using TownNPCGuide.Common.Systems;
 
 namespace TownNPCGuide
 {
@@ -33,12 +32,6 @@ namespace TownNPCGuide
 			VirtualCurrency.VirtualCurrencyID = CustomCurrencyManager.RegisterCurrency(VirtualCurrency.VirtualCurrencySystem);
 		}
 
-		public override void PostSetupContent() {
-			//if (ModLoader.TryGetMod("Census", out Mod censusMod)) {
-			//	censusMod.Call("TownNPCCondition", ModContent.NPCType<TutorialTownNPC>(), Language.GetTextValue($"Mods.TownNPCGuide.CrossMod.Census.TutorialTownNPC"));
-			//}
-		}
-
 		public override void HandlePacket(BinaryReader reader, int whoAmI)
 		{
 			TownNPCGuideMessageType msgType = (TownNPCGuideMessageType)reader.ReadByte();
@@ -47,7 +40,7 @@ namespace TownNPCGuide
 			{
 				case TownNPCGuideMessageType.TownPetUnlockOrExchange:
 					// Call a custom function that we made in our License item.
-					TutorialTownPetLicense.TutorialTownPetUnlockOrExchangePet(ref TownNPCGuideWorld.boughtTutorialTownPet, ModContent.NPCType<TutorialTownPet>(), "Mods.TownNPCGuide.NPCs.TutorialTownPet.UI.LicenseTutorialTownPetUse");
+					TutorialTownPetLicense.TutorialTownPetUnlockOrExchangePet(ref TownNPCGuideWorld.boughtTutorialTownPet, ModContent.NPCType<TutorialTownPet>(), "Mods.TownNPCGuide.Items.TutorialTownPetLicense.LicenseTutorialTownPetUse");
 					break;
 				default:
 					break;

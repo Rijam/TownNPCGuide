@@ -1,7 +1,7 @@
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
-using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameContent.Bestiary;
@@ -9,6 +9,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.Utilities;
+using TownNPCGuide.Common.Systems;
 
 namespace TownNPCGuide.Content.NPCs.TownNPCs.TownPets
 {
@@ -51,6 +52,8 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TownPets
 			NPCID.Sets.IsTownPet[Type] = true; // Our NPC is a Town Pet
 			NPCID.Sets.CannotSitOnFurniture[Type] = false; // True by default, but Town Cats can sit on furniture.
 			NPCID.Sets.TownNPCBestiaryPriority.Add(Type); // Puts our NPC with all of the other Town NPCs.
+			// NPCID.Sets.PlayerDistanceWhilePetting[Type] = 28; // Distance the player stands from the Town Pet to pet.
+			// NPCID.Sets.IsPetSmallForPetting[Type] = true; // Arm is angled down while petting.
 
 			// Influences how the NPC looks in the Bestiary
 			NPCID.Sets.NPCBestiaryDrawModifiers drawModifiers = new()
@@ -158,6 +161,70 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TownPets
 		{
 			return false; // Don't go to King or Queen statues. (Default is false so this technically isn't needed.)
 		}
+
+		/*
+		public override void ChatBubblePosition(ref Vector2 position, ref SpriteEffects spriteEffects)
+		{
+			if (NPC.ai[0] == 5f) { // Sitting in a chair.
+				position.Y -= 18f; // Move upwards.
+			}
+		}
+		*/
+
+		/*
+		public override bool PreAI()
+		{
+			if (NPC.ai[0] == 5f) { // Move up visually while sitting in a chair.
+				DrawOffsetY = -10;
+			}
+			else {
+				DrawOffsetY = 0;
+			}
+			return base.PreAI();
+		}
+		*/
+
+		/*
+		public override void EmoteBubblePosition(ref Vector2 position, ref SpriteEffects spriteEffects)
+		{
+			// Flip the emote bubble and move it.
+			spriteEffects = NPC.spriteDirection == -1 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
+			position.X += NPC.width * NPC.direction;
+		}
+		*/
+
+		/*
+		public override void PartyHatPosition(ref Vector2 position, ref SpriteEffects spriteEffects)
+		{
+			// Move the party hat forward so it is actually on the cat's head.
+			int frame = NPC.frame.Y / NPC.frame.Height;
+			int xOffset = 5;
+			switch (frame) {
+				case 19:
+				case 22:
+				case 23:
+				case 24:
+				case 25:
+				case 26:
+				case 27:
+					xOffset -= 2;
+					break;
+				case 11:
+				case 12:
+				case 13:
+				case 14:
+				case 15:
+					xOffset += 2;
+					break;
+			}
+			position.X += xOffset * NPC.spriteDirection;
+
+			// Move it up to match the location of the head when sitting in a chair.
+			if (NPC.ai[0] == 5f) {
+				position.Y += -8;
+			}
+		}
+		*/
 	}
 
 	public class TutorialTownPetProfile : ITownNPCProfile

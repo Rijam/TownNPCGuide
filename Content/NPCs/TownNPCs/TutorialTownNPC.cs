@@ -16,6 +16,7 @@ using Terraria.Utilities;
 using TownNPCGuide.Content.Items;
 using TownNPCGuide.EmoteBubbles;
 using TownNPCGuide.Content.Currencies;
+using TownNPCGuide.Common.Systems;
 
 namespace TownNPCGuide.Content.NPCs.TownNPCs
 {

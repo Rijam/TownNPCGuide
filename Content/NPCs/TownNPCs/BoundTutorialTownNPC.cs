@@ -1,10 +1,9 @@
 using Microsoft.Xna.Framework;
-using System.IO;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using Terraria.ModLoader.IO;
+using TownNPCGuide.Common.Systems;
 
 namespace TownNPCGuide.Content.NPCs.TownNPCs
 {
@@ -100,39 +99,6 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs
 				Gore.NewGore(NPC.GetSource_Death(), NPC.position + new Vector2(0, NPC.height), NPC.velocity, Mod.Find<ModGore>("TutorialTownNPC_Gore_Leg").Type);
 				Gore.NewGore(NPC.GetSource_Death(), NPC.position + new Vector2(0, NPC.height), NPC.velocity, Mod.Find<ModGore>("TutorialTownNPC_Gore_Leg").Type);
 			}
-		}
-	}
-
-	// Here is where we save that our Town NPC has been rescued to the world.
-	public class TownNPCGuideWorld : ModSystem {
-		public static bool rescuedTutorialTownNPC = false;
-		public static bool boughtTutorialTownPet = false;
-
-		public override void SaveWorldData(TagCompound tag) {
-			if (rescuedTutorialTownNPC) {
-				tag["rescuedTutorialTownNPC"] = true;
-			}
-			if (boughtTutorialTownPet) {
-				tag["boughtTutorialTownPet"] = true;
-			}
-		}
-
-		public override void LoadWorldData(TagCompound tag) {
-			rescuedTutorialTownNPC = tag.ContainsKey("rescuedTutorialTownNPC");
-			boughtTutorialTownPet = tag.ContainsKey("boughtTutorialTownPet");
-		}
-
-		public override void NetSend(BinaryWriter writer) {
-			BitsByte flags = new BitsByte();
-			flags[0] = rescuedTutorialTownNPC;
-			flags[1] = boughtTutorialTownPet;
-			writer.Write(flags);
-		}
-
-		public override void NetReceive(BinaryReader reader) {
-			BitsByte flags = reader.ReadByte();
-			rescuedTutorialTownNPC = flags[0];
-			boughtTutorialTownPet = flags[1];
 		}
 	}
 }

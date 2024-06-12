@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using TownNPCGuide.Content.NPCs.TownNPCs;
+using TownNPCGuide.Common.Systems;
 
 namespace TownNPCGuide.Content.Items
 {

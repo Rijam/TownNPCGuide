@@ -61,7 +61,6 @@ Mods: {
 			TutorialTownPet: {
 				DisplayName: Tutorial Town Pet
 				Census.SpawnCondition: Use a Tutorial Town Pet License
-				UI.LicenseTutorialTownPetUse: The license teleports away to the Tutorial Town Pet delivery service...
 				Bestiary: A cute Tutorial Town Pet. Everyone's favorite species of pet!
 			}
 
@@ -99,6 +98,7 @@ Mods: {
 					Use additional licenses to activate the Pet Exchange Program!
 					Find the perfect fit for you and your Tutorial Town Pet!
 					'''
+				LicenseTutorialTownPetUse: The license teleports away to the Tutorial Town Pet delivery service...
 			}
 
 			TutorialCurrencyCoin: {
