@@ -448,7 +448,7 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs
 			// Here is an example using a foreach loop
 			foreach (Item item in items) {
 				// If the item in the list isn't a real item, continue to the next item in the list.
-				if (item.IsAir)
+				if (item is null)
 				{
 					continue;
 				}
@@ -473,7 +473,7 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs
 			// Here is an example using a for loop
 			for (int i = 0; i < items.Length; i++) {
 				// Here we find the first item that doesn't exist and set it to the Universal Pylon, then we break out of the loop to stop it.
-				if (items[i].IsAir) {
+				if (items[i] is null) {
 					items[i] = new Item(ItemID.TeleportationPylonVictory);
 					break;
 				}
