@@ -447,8 +447,8 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs
 
 			// Here is an example using a foreach loop
 			foreach (Item item in items) {
-				// If the item in the list doesn't exist, continue to the next item.
-				if (item is null)
+				// If the item in the list isn't a real item, continue to the next item in the list.
+				if (!item.IsAir)
 				{
 					continue;
 				}
@@ -463,15 +463,17 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs
 				// If the player has the Discount Card equipped, then make the prices even cheaper for our Town NPC.
 				if (Main.LocalPlayer.discountAvailable) {
 					// We want to discount the shopCustomPrice number if it exists. If it doesn't, then we discount the value instead.
+					// Item.GetStoreValue() will return the shopCustomPrice if it exists, otherwise it'll return the value.
+					// (It is the same as writing `item.shopCustomPrice ?? item.value` if you prefer that.)
 					// Changing the price like this is multiplicative with the discount from the Discount Card. (So 0.8f * 0.8f == 0.64f or 36% discount)
-					item.shopCustomPrice = (int?)((item.shopCustomPrice ?? item.value) * 0.8f);
+					item.shopCustomPrice = (int?)(item.GetStoreValue() * 0.8f);
 				}
 			}
 
 			// Here is an example using a for loop
 			for (int i = 0; i < items.Length; i++) {
 				// Here we find the first item that doesn't exist and set it to the Universal Pylon, then we break out of the loop to stop it.
-				if (items[i] is null) {
+				if (items[i].IsAir) {
 					items[i] = new Item(ItemID.TeleportationPylonVictory);
 					break;
 				}
