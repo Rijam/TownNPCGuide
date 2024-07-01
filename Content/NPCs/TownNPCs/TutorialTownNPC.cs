@@ -448,7 +448,7 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs
 			// Here is an example using a foreach loop
 			foreach (Item item in items) {
 				// If the item in the list isn't a real item, continue to the next item in the list.
-				if (!item.IsAir)
+				if (item.IsAir)
 				{
 					continue;
 				}
