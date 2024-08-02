@@ -52,8 +52,8 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TownPets
 			NPCID.Sets.IsTownPet[Type] = true; // Our NPC is a Town Pet
 			NPCID.Sets.CannotSitOnFurniture[Type] = false; // True by default, but Town Cats can sit on furniture.
 			NPCID.Sets.TownNPCBestiaryPriority.Add(Type); // Puts our NPC with all of the other Town NPCs.
-			// NPCID.Sets.PlayerDistanceWhilePetting[Type] = 28; // Distance the player stands from the Town Pet to pet.
-			// NPCID.Sets.IsPetSmallForPetting[Type] = true; // Arm is angled down while petting.
+			NPCID.Sets.PlayerDistanceWhilePetting[Type] = 28; // Distance the player stands from the Town Pet to pet.
+			NPCID.Sets.IsPetSmallForPetting[Type] = true; // Arm is angled down while petting.
 
 			// Influences how the NPC looks in the Bestiary
 			NPCID.Sets.NPCBestiaryDrawModifiers drawModifiers = new()
@@ -162,16 +162,13 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TownPets
 			return false; // Don't go to King or Queen statues. (Default is false so this technically isn't needed.)
 		}
 
-		/*
 		public override void ChatBubblePosition(ref Vector2 position, ref SpriteEffects spriteEffects)
 		{
 			if (NPC.ai[0] == 5f) { // Sitting in a chair.
 				position.Y -= 18f; // Move upwards.
 			}
 		}
-		*/
 
-		/*
 		public override bool PreAI()
 		{
 			if (NPC.ai[0] == 5f) { // Move up visually while sitting in a chair.
@@ -182,18 +179,14 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TownPets
 			}
 			return base.PreAI();
 		}
-		*/
 
-		/*
 		public override void EmoteBubblePosition(ref Vector2 position, ref SpriteEffects spriteEffects)
 		{
 			// Flip the emote bubble and move it.
 			spriteEffects = NPC.spriteDirection == -1 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
 			position.X += NPC.width * NPC.direction;
 		}
-		*/
 
-		/*
 		public override void PartyHatPosition(ref Vector2 position, ref SpriteEffects spriteEffects)
 		{
 			// Move the party hat forward so it is actually on the cat's head.
@@ -224,7 +217,6 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TownPets
 				position.Y += -8;
 			}
 		}
-		*/
 	}
 
 	public class TutorialTownPetProfile : ITownNPCProfile
@@ -280,92 +272,5 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TownPets
 				_ => headIndex0
 			};
 		}
-	}
-
-	public class PetDetour : ModSystem
-	{
-		// The position of the player and the angle of their arm when petting is hardcoded.
-		// We can use a Detour to change it for our Town Pet.
-
-		public override void Load()
-		{
-			Terraria.On_Player.GetPettingInfo += Player_Hook_GetPettingInfo; // Load and apply our Detour.
-			Terraria.On_Main.NPCAddHeight += Main_Hook_NPCAddHeight;
-		}
-
-		private delegate void orig_Player_GetPettingInfo(Player self); // Create a delegate because the original method is private.
-
-		// Create our Detour
-		private static void Player_Hook_GetPettingInfo(Terraria.On_Player.orig_GetPettingInfo orig, Player self, int animalNpcIndex, out int targetDirection, out Vector2 playerPositionWhenPetting, out bool isPetSmall)
-		{
-			// Run the vanilla code first.
-			orig(self, animalNpcIndex, out targetDirection, out playerPositionWhenPetting, out isPetSmall);
-
-			// Vanilla code
-			/*
-			int num = 36; // <--- distance multiplier
-			isPetSmall = false;
-			switch (nPC.type)
-			{
-				case 637: // <--- Town Cat
-					isPetSmall = true;
-					num = 28;
-					break;
-				case 656:
-					isPetSmall = true;
-					num = 24;
-					break;
-				case 670:
-				case 678:
-				case 679:
-				case 680:
-				case 681:
-				case 683:
-					isPetSmall = true;
-					num = 26;
-					break;
-				case 682:
-					isPetSmall = true;
-					num = 22;
-					break;
-				case 684:
-					isPetSmall = true;
-					num = 20;
-					break;
-			}
-
-			playerPositionWhenPetting = nPC.Bottom + new Vector2(-targetDirection * num, 0f);
-			*/
-
-			// If the NPC type is our Town Pet
-			if (Main.npc[animalNpcIndex].type == ModContent.NPCType<TutorialTownPet>())
-			{
-				// Since the default distance multiplier is 36 and our Town Pet mimics the Town Cat which as a multiplier of 28,
-				// we will move the position by 8 to match.
-				// The position also depends on the width of the NPC's hitbox.
-				playerPositionWhenPetting += new Vector2(targetDirection * 8f, 0f);
-
-				// isPetSmall will make the arm angled down. Otherwise it is angled slightly up.
-				isPetSmall = true;
-			}
-		}
-
-		// Since our Town Pet can sit in chairs, we want to them to be moved up visually to match the height of the chair.
-		private static float Main_Hook_NPCAddHeight(Terraria.On_Main.orig_NPCAddHeight orig, NPC theNPC)
-		{
-			// The NPC is our Town Pet and the Town Pet is sitting.
-			if (theNPC.type == ModContent.NPCType<TutorialTownPet>() && theNPC.ai[0] == 5f)
-			{
-				// Move 14 pixels up. This matches the Town Cat.
-				return -14f * theNPC.scale;
-			}
-
-			// Otherwise, run the vanilla code.
-			return orig(theNPC);
-		}
-
-		// Still have other issues:
-		// Chat bubble when hovering over the NPC isn't shifted up when sitting. Main.DrawNPCChatBubble()
-		// Party hat isn't in the correct position. Main.DrawNPCExtras()
 	}
 }

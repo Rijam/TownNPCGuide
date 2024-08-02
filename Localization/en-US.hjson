@@ -58,6 +58,26 @@ Mods: {
 
 			BoundTutorialTownNPC.DisplayName: Bound Tutorial Town NPC
 
+			TutorialSkeletonMerchant: {
+				DisplayName: Tutorial Skeleton Merchant
+				Census.SpawnCondition: TBD
+
+				Dialogue: {
+					StandardDialogue1: Hello!
+					StandardDialogue2: Reading up on those tutorials I see!
+					StandardDialogue3: All this coding is confusing...
+					StandardDialogue4: Have you met my buddy Example Person?
+				}
+
+				Bestiary: TBH
+
+				Names: {
+					Boney: Boney
+					Lanky: Lanky
+					Silly: Silly
+				}
+			}
+
 			TutorialTownPet: {
 				DisplayName: Tutorial Town Pet
 				Census.SpawnCondition: Use a Tutorial Town Pet License
