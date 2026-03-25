@@ -16,10 +16,6 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TutorialSkeletonMerchant
 	{
 		private static Profiles.StackedNPCProfile NPCProfile; // The Town NPC Profile.
 
-		public override void Load() {
-			base.Load();
-		}
-
 		public override void SetStaticDefaults() {
 			Main.npcFrameCount[Type] = 23; // The total amount of frames the NPC has. You may need to change this based on how many frames your sprite sheet has.
 			NPCID.Sets.ExtraFramesCount[Type] = 7; // Generally for Town NPCs, but this is how the NPC does extra things such as sitting in a chair and talking to other NPCs. This is the remaining frames after the walking frames.
@@ -97,7 +93,7 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TutorialSkeletonMerchant
 				// With Town NPCs, you usually set this to what biome it likes the most in regards to NPC happiness.
 				BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Biomes.Caverns,
 				// Sets your NPC's flavor text in the bestiary.
-				new FlavorTextBestiaryInfoElement("Mods.TownNPCGuide.NPCs.TutorialTownNPC.Bestiary")
+				new FlavorTextBestiaryInfoElement("Mods.TownNPCGuide.NPCs.TutorialSkeletonMerchant.Bestiary")
 			});
 			bestiaryEntry.Info.RemoveAll((IBestiaryInfoElement x) => x is NPCKillCounterInfoElement); // Hides the kill count in the Bestiary.
 		}

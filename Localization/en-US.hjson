@@ -96,6 +96,8 @@ Mods: {
 					Standard3: It is very important that you know the difference between a cog, gear, and a sprocket!
 				}
 			}
+
+			TutorialTravelingMerchant.DisplayName: Tutorial Traveling Merchant
 		}
 
 		Conditions: {
