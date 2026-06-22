@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
@@ -9,6 +10,8 @@ using Terraria.GameContent.Bestiary;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.Utilities;
+using TownNPCGuide.Content.EmoteBubbles;
 
 namespace TownNPCGuide.Content.NPCs.TownNPCs.TutorialTravelingMerchant
 {
@@ -43,7 +46,7 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TutorialTravelingMerchant
 
 			// Connects this NPC with a custom emote.
 			// This makes it when the NPC is in the world, other NPCs will "talk about him".
-			// NPCID.Sets.FaceEmote[Type] = ModContent.EmoteBubbleType<TutorialTravelingMerchantEmote>();
+			NPCID.Sets.FaceEmote[Type] = ModContent.EmoteBubbleType<TutorialTravelingMerchantEmote>();
 
 			// Influences how the NPC looks in the Bestiary
 			NPCID.Sets.NPCBestiaryDrawModifiers drawModifiers = new()
@@ -58,6 +61,13 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TutorialTravelingMerchant
 				new Profiles.DefaultNPCProfile(Texture, NPCHeadLoader.GetHeadSlot(HeadTexture)),
 				new Profiles.DefaultNPCProfile(Texture + "_Shimmer", ShimmerHeadIndex)
 			);
+
+			// Here we define which portrait to use for the Town NPC when the portrait style setting is set to detailed.
+			NPCID.Sets.NPCPortraits.Add(Type, NPCID.Sets.PrioritizedPortrait()
+				.With(NPCID.Sets.ShimmeredPortraitCondition, NPCID.Sets.BasicPortrait($"{Texture}_Shimmer_Portrait"))
+				.Default(NPCID.Sets.BasicPortrait($"{Texture}_Portrait")));
+			NPCID.Sets.NPCPortraitsCloseUpOffsets.Add(Type, new Vector2(0f, 0f)); // Here we can change the offsets of Town NPC when the portrait style setting is set to profile.
+			NPCID.Sets.NPCPortraitsFullBodyRetroOffsets.Add(Type, new Vector2(0f, 0f)); // Here we can change the offsets of Town NPC when the portrait style setting is set to retro.
 		}
 
 		public override void SetDefaults()
@@ -154,39 +164,44 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TutorialTravelingMerchant
 
 		public override string GetChat()
 		{
-			return "test";
+			WeightedRandom<string> chat = new WeightedRandom<string>();
+
+			// These are things that the NPC has a chance of telling you when you talk to it.
+			chat.Add(Language.GetTextValue("Mods.TownNPCGuide.NPCs.TutorialTravelingMerchant.Dialogue.StandardDialogue1"));
+			chat.Add(Language.GetTextValue("Mods.TownNPCGuide.NPCs.TutorialTravelingMerchant.Dialogue.StandardDialogue2"));
+			chat.Add(Language.GetTextValue("Mods.TownNPCGuide.NPCs.TutorialTravelingMerchant.Dialogue.StandardDialogue3"));
+			chat.Add(Language.GetTextValue(this.GetLocalizationKey("Dialogue.StandardDialogue4"))); // this.GetLocalizationKey("") Will automatically get the "Mods.ModName.Category.ContentType.ContentName" part.
+			return chat; // chat is implicitly cast to a string.
 		}
 
-		public override void SetChatButtons(ref string button, ref string button2)
+		// This hooks is where we register which buttons will show up when interacting the Town NPC.
+		// The "Close", "Happiness", and "Housing" buttons are automatically registered first.
+		// This NPC isn't affected by happiness, so the "Happiness" and "Housing" buttons won't show up.
+		public override void RegisterChatButtons(NPCInteractionList interactions)
 		{
-			button = Language.GetTextValue("LegacyInterface.28"); // This is the key to the word "Shop"
-			if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.LeftShift))
-			{
-				button2 = "Reroll shop";
-			}
-			else
-			{
-				button2 = "Advanced Shop";
-			}
+			// Here is one way to assign a Shop button to our NPC.
+			// In this example, we are assigning the button to be at the beginning of the list.
+			// The shop name we pass in NPCInteractions.Shop() needs to be the same name as what we use to register the NPCShop.
+			interactions.InsertBefore(NPCInteractions.Shop(Shop1Simple, "Mods.TownNPCGuide.NPCs.TutorialTravelingMerchant.UI.SimpleShop"), NPCInteractionDatabase.CloseButton);
+			interactions.InsertBefore(NPCInteractions.Shop(Shop2Advanced, "Mods.TownNPCGuide.NPCs.TutorialTravelingMerchant.UI.AdvancedShop"), NPCInteractionDatabase.CloseButton);
+			interactions.InsertAfter(new RerollShopsButton(), NPCInteractionDatabase.CloseButton);
 		}
 
-		public override void OnChatButtonClicked(bool firstButton, ref string shop)
+		// This is a custom button to reroll the shops.
+		public class RerollShopsButton : NPCInteraction
 		{
-			if (firstButton)
+			public override string GetText() => Language.GetTextValue("Mods.TownNPCGuide.NPCs.TutorialTravelingMerchant.UI.RerollShops");
+			public override bool Condition() => true;
+			public override void Interact()
 			{
-				shop = Shop1; // Opens the shop
-			}
-			if (!firstButton && Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.LeftShift))
-			{
+				Main.npcChatText = Language.GetTextValue("Mods.TownNPCGuide.NPCs.TutorialTravelingMerchant.Dialogue.RerollShopDialogue");
+				Main.DoNPCPortraitHop();
+
 				simpleShopItems.Clear();
 				simpleShopItems.AddRange(SimpleShop.GenerateNewInventoryList());
 
 				advancedShopItems.Clear();
 				advancedShopItems.AddRange(AdvancedShop.GenerateNewInventoryList());
-			}
-			else if (!firstButton)
-			{
-				shop = Shop2;
 			}
 		}
 
@@ -249,7 +264,6 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TutorialTravelingMerchant
 					ChatHelper.BroadcastChatMessage(NetworkText.FromKey("LegacyMisc.35", NPC.GetFullNetName()), new Color(50, 125, 255));
 				}
 				NPC.active = false;
-				NPC.netSkip = -1;
 				NPC.life = 0;
 				return false;
 			}
@@ -282,7 +296,7 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TutorialTravelingMerchant
 				{
 					spawnTime = double.MaxValue; // no spawn today
 				}
-				Main.NewText($"spawnTime {spawnTime}");
+				// Main.NewText($"spawnTime {spawnTime}");
 			}
 
 			// Spawn the traveler if the spawn conditions are met (time of day, no events, no sundial)
@@ -345,18 +359,26 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TutorialTravelingMerchant
 			return (maxTime - minTime) * Main.rand.NextDouble() + minTime;
 		}
 
-		public const string Shop1 = "Shop1";
-		// The list of items in the traveler's shop. Saved with the world and set when the traveler spawns. Synced by the server to clients in multi player
+		public const string Shop1Simple = "Shop1Simple";
+		/// <summary>
+		/// The list of items in the traveler's shop. Saved with the world and set when the traveler spawns. Synced by the server to clients in multi player
+		/// </summary>
 		public readonly static List<Item> simpleShopItems = new();
 
-		// A static instance of the declarative shop, defining all the items which can be brought. Used to create a new inventory when the NPC spawns
+		/// <summary>
+		/// A static instance of the declarative shop, defining all the items which can be brought. Used to create a new inventory when the NPC spawns
+		/// </summary>
 		public static SimpleTravelingMerchantShop SimpleShop;
 
-		public const string Shop2 = "Shop2";
-		// The list of items in the traveler's shop. Saved with the world and set when the traveler spawns. Synced by the server to clients in multi player
+		public const string Shop2Advanced = "Shop2Advanced";
+		/// <summary>
+		/// The list of items in the traveler's shop. Saved with the world and set when the traveler spawns. Synced by the server to clients in multi player
+		/// </summary>
 		public readonly static List<Item> advancedShopItems = new();
 
-		// A static instance of the declarative shop, defining all the items which can be brought. Used to create a new inventory when the NPC spawns
+		/// <summary>
+		/// A static instance of the declarative shop, defining all the items which can be brought. Used to create a new inventory when the NPC spawns
+		/// </summary>
 		public static AdvancedTravelingMerchantShop AdvancedShop;
 
 		public override void OnSpawn(IEntitySource source)
@@ -378,7 +400,8 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TutorialTravelingMerchant
 
 		public override void AddShops()
 		{
-			SimpleShop = new SimpleTravelingMerchantShop(NPC.type, Shop1)
+			// The Simple Shop contains a bunch of items that are randomly selected to be shown with equal weight. The number of items chosen is not guaranteed.
+			SimpleShop = new SimpleTravelingMerchantShop(Type, Shop1Simple)
 				.Add(ItemID.CopperPickaxe)
 				.Add(ItemID.TinPickaxe)
 				.Add(ItemID.IronPickaxe, Condition.DownedEyeOfCthulhu)
@@ -389,20 +412,25 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TutorialTravelingMerchant
 				.Add(new Item(ItemID.PlatinumPickaxe) { shopCustomPrice = Item.buyPrice(gold: 1, silver: 50) }, Condition.DownedSkeletron);
 			SimpleShop.Register();
 
-			AdvancedShop = new AdvancedTravelingMerchantShop(NPC.type, Shop2);
-			AdvancedShop.Add(ItemID.CopperPickaxe);
-			AdvancedShop.Add(ItemID.TinPickaxe, 1f, Condition.DownedEyeOfCthulhu);
-			AdvancedShop.AddPool("Swords", 3)
-				.Add(ItemID.CopperBroadsword)
+			// The Advanced Shop contains several categories of items (we've called pools) with a certain number of items from each pool being chosen and each item in the pool having weights.
+			AdvancedShop = new AdvancedTravelingMerchantShop(Type, Shop2Advanced);
+
+			AdvancedShop.Add(ItemID.CopperPickaxe); // This item is not in a pool, so it is guaranteed to show up.
+			AdvancedShop.Add(ItemID.TinPickaxe, conditions: Condition.DownedEyeOfCthulhu);
+
+			// Add a pool of items called "Swords" with 3 slots. 3 items from this pool will be chosen.
+			AdvancedShop.AddPool("Swords", slots: 3)
+				.Add(ItemID.CopperBroadsword) // Weight of 1. Bigger values means the item is more likely to be chosen.
 				.Add(ItemID.TinBroadsword)
-				.Add(ItemID.IronBroadsword, 0.5f, Condition.DownedEyeOfCthulhu)
+				.Add(ItemID.IronBroadsword, 0.5f, Condition.DownedEyeOfCthulhu) // Weight of 0.5f
 				.Add(ItemID.LeadBroadsword, 0.5f, Condition.DownedEyeOfCthulhu)
 				.Add(ItemID.SilverBroadsword, 1f, Condition.DownedEowOrBoc)
 				.Add(ItemID.TungstenBroadsword, 1f, Condition.DownedEowOrBoc)
 				.Add(new Item(ItemID.GoldBroadsword) { shopCustomPrice = Item.buyPrice(gold: 1) }, 2f, Condition.DownedSkeletron)
 				.Add(new Item(ItemID.PlatinumBroadsword) { shopCustomPrice = Item.buyPrice(gold: 1, silver: 50) }, 2f, Condition.DownedSkeletron)
 				.Add(ItemID.FieryGreatsword, 10f);
-			AdvancedShop.AddPool("Axes", 6)
+			// Add a poll of items called "Axes" with 6 slots. 6 items from this pool will be chosen.
+			AdvancedShop.AddPool("Axes", slots: 6)
 				.Add(ItemID.CopperAxe, 5f)
 				.Add(ItemID.TinAxe, 3f)
 				.Add(ItemID.IronAxe, 2.5f, Condition.DownedEyeOfCthulhu)
@@ -414,34 +442,61 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TutorialTravelingMerchant
 				.Add(ItemID.WarAxeoftheNight, 0.05f, Condition.Hardmode)
 				.Add(ItemID.BloodLustCluster, 0.025f, Condition.Hardmode)
 				.Add(ItemID.LunarHamaxeSolar, 25f, Condition.DownedMoonLord);
-			AdvancedShop.AddPool("Vanity", 1)
-				.Add(ItemID.CopperHelmet);
+			// Add a poll of items called "Helmets" with 1 slot. 1 item from this pool will be chosen.
+			AdvancedShop.AddPool("Helmets", slots: 1)
+				.Add(ItemID.CopperHelmet, 3f)
+				.Add(ItemID.TinHelmet, 3f)
+				.Add(ItemID.IronHelmet, 2f)
+				.Add(ItemID.LeadHelmet, 2f)
+				.Add(ItemID.SilverHelmet)
+				.Add(ItemID.TungstenHelmet)
+				.Add(ItemID.GoldHelmet, 0.5f)
+				.Add(ItemID.PlatinumHelmet, 0.5f);
+
+			// This pool says there should be 5 items chosen from it, but we've only defined 2 possible items. Those 2 items will always be chosen.
+			AdvancedShop.AddPool("TooFewItems", slots: 5)
+				.Add(ItemID.CopperChainmail)
+				.Add(ItemID.TinChainmail);
+			// This pool has items who's conditions are always false. Nothing will show up.
+			AdvancedShop.AddPool("NoAvailableItems", slots: 2)
+				.Add(ItemID.CopperGreaves, conditions: new Condition("Not available", () => false))
+				.Add(ItemID.TinGreaves, conditions: new Condition("Not available", () => false));
+
+			// This pool will have more items based on a condition.
+			// In this case it is if the player is facing left or right for demonstration. This wouldn't work in multiplayer.
+			// Another more useful example for Hardmode: new Func<int>(() => Main.hardMode ? 5 : 2)
+			AdvancedShop.AddPool("MoreItemsAfterCondition", new Func<int>(() => Main.LocalPlayer.direction == -1 ? 5 : 2))
+				.Add(ItemID.DirtBlock, 5f)
+				.Add(ItemID.ClayBlock, 4f)
+				.Add(ItemID.MudBlock, 2f)
+				.Add(ItemID.StoneBlock, 1f)
+				.Add(ItemID.SiltBlock, 0.5f)
+				.Add(ItemID.AshBlock, 0.25f);
 
 			AdvancedShop.Register();
 		}
 		#endregion
 	}
 
+	/// <summary>
+	/// A simple shop that inherits AbstractNPCShop. This shop unintelligently randomly selects items from the list of available items.
+	/// </summary>
 	public class SimpleTravelingMerchantShop(int npcType, string name = "Shop") : AbstractNPCShop(npcType, name)
 	{
-		public new record Entry(Item Item, List<Condition> Conditions) : AbstractNPCShop.Entry
-		{
-			IEnumerable<Condition> AbstractNPCShop.Entry.Conditions => Conditions;
-
-			public bool ConditionsMet() => Conditions.All(c => c.IsMet());
-		}
-
 		private List<Entry> _entries = [];
-		public override IEnumerable<Entry> ActiveEntries => _entries;
+		protected override IEnumerable<Entry> AllEntries => _entries;
 		public SimpleTravelingMerchantShop Add(params Entry[] entries)
 		{
 			_entries.AddRange(entries);
 			return this;
 		}
 
+
+		// Here are the two methods that are used in AddShops() to add items.
 		/// <summary> Adds the specified item with the provided conditions to this shop. If all of the conditions are satisfied, the item will be available in the shop. </summary>
-		public SimpleTravelingMerchantShop Add(int item, params Condition[] condition) => Add(new Entry(ContentSamples.ItemsByType[item], condition.ToList()));
-		public SimpleTravelingMerchantShop Add(Item item, params Condition[] condition) => Add(new Entry(item, condition.ToList()));
+		public SimpleTravelingMerchantShop Add(int item, params Condition[] condition) => Add(new AbstractNPCShop.Entry(ContentSamples.ItemsByType[item], condition));
+		/// <summary> Adds the specified item with the provided conditions to this shop. If all of the conditions are satisfied, the item will be available in the shop. </summary>
+		public SimpleTravelingMerchantShop Add(Item item, params Condition[] condition) => Add(new AbstractNPCShop.Entry(item, condition));
 
 		public override void FillShop(ICollection<Item> items, NPC npc)
 		{
@@ -480,108 +535,241 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TutorialTravelingMerchant
 			var items = new List<Item>();
 			foreach (var entry in _entries)
 			{
-				if (entry.ConditionsMet() && Main.rand.NextBool(3))
+				// Unintelligently rolls if the item should be in the shop.
+				// This means the shop could end up with all possible items or 0 items.
+				if (entry.ConditionsMet() && Main.rand.NextBool(3)) 
 				{
 					items.Add(entry.Item);
 				}
 			}
-			if (items.Count == 0)
+			if (items.Count == 0) // If the shop was empty, lets roll again so we can get at least one item.
 			{
 				Main.NewText("Shop 1 was empty, rerolling.");
-				goto Beginning;
+				goto Beginning; // Warning: If no item could be rolled because of their condition, this will get stuck in an infinite loop.
 			}
 			return items;
 		}
 	}
 
+	/// <summary>
+	/// This shop system is a more complex.
+	/// <br/> It allows for normal items that are always available.
+	/// <br/> It allows selecting a number of items from a pools of items that weighted.
+	/// </summary>
+	/// <param name="npcType"></param>
+	/// <param name="name"></param>
 	public class AdvancedTravelingMerchantShop(int npcType, string name = "Shop") : AbstractNPCShop(npcType, name)
 	{
-
-		public new record Entry(Item Item, List<Condition> Conditions, float Weight = 1f) : AbstractNPCShop.Entry
+		/// <summary>
+		/// Similar to AbstractNPCShop.Entry, but with the weight added on.
+		/// </summary>
+		public class WeightedEntry(Item item, List<Condition> condition, float weight = 1f) : AbstractNPCShop.Entry(item, condition.ToArray())
 		{
-			IEnumerable<Condition> AbstractNPCShop.Entry.Conditions => Conditions;
+			/// <summary> The weight of the item. Bigger the number the more likely it is to be chosen. </summary>
+			public float Weight = weight;
 
-			public float Weight = Weight;
+			// The following is already implemented by AbstractNPCShop.Entry; here is what it does:
+			/*
+			public Item Item { get; } = item;
+
+			private readonly List<Condition> _conditions = condition;
+			IEnumerable <Condition> Conditions => _conditions;
 
 			public bool Disabled { get; private set; }
 
-			public Entry Disable()
+			public void Disable() => Disabled = true;
+
+			public void AddCondition(Condition condition)
 			{
-				Disabled = true;
-				return this;
+				ArgumentNullException.ThrowIfNull(condition, nameof(condition));
+				_conditions.Add(condition);
 			}
 
-			public bool ConditionsMet() => Conditions.All(c => c.IsMet());
+			public bool ConditionsMet()
+			{
+				foreach (var c in _conditions) {
+					if (!c.IsMet())
+						return false;
+				}
+
+				return true;
+			}
+			*/
 		}
 
-		public record Pool(string Name, int Slots, List<Entry> Entries, float Weight)
+		/// <summary>
+		/// Creates a pool of items.
+		/// </summary>
+		/// <param name="Name">The name of the pool.</param>
+		/// <param name="Slots">The number of items from the pool to choose. Func&lt;int&gt; to allow for dynamic sizes.</param>
+		/// <param name="Entries">The item with condition and weight.</param>
+		public record Pool(string Name, Func<int> Slots, List<WeightedEntry> Entries)
 		{
 			public Pool Add(Item item, float weight = 1f, params Condition[] conditions)
 			{
-				Entries.Add(new Entry(item, conditions.ToList(), weight));
+				Entries.Add(new WeightedEntry(item, conditions.ToList(), weight));
 				return this;
 			}
 
+			// Here are the two methods that are used in AddShops() to add items.
+			/// <summary> Adds the specified item with the provided conditions to this pool. If all of the conditions are satisfied, the item will be available in the shop. </summary>
 			public Pool Add<T>(float weight = 1f, params Condition[] conditions) where T : ModItem => Add(ModContent.ItemType<T>(), weight, conditions);
+			/// <summary> Adds the specified item with the provided conditions to this pool. If all of the conditions are satisfied, the item will be available in the shop. </summary>
 			public Pool Add(int item, float weight = 1f, params Condition[] conditions) => Add(ContentSamples.ItemsByType[item], weight, conditions);
 
 			// Picks a number of items (up to Slots) from the entries list, provided conditions are met.
 			public IEnumerable<Item> PickItems()
 			{
 				// This is not a fast way to pick items without replacement, but it's certainly easy. Be careful not to do this many many times per frame, or on huge lists of items.
-				var list = Entries.Where(e => !e.Disabled && e.ConditionsMet()).ToList();
-				for (int i = 0; i < Slots; i++)
+				List<WeightedEntry> list = Entries.Where(e => !e.Disabled && e.ConditionsMet()).ToList();
+
+				// The order of the items in the list can have an effect on the outcome.
+				// For extra randomness, shuffle the list.
+				// list = list.Shuffle().ToList();
+
+				// Each pool has the number of slots it should choose
+				for (int i = 0; i < Slots.Invoke(); i++)
 				{
+					// If there are no items to choose, then don't choose any items.
 					if (list.Count == 0)
+					{
 						break;
+					}
 
-					float totalWeight = list.Sum(x => x.Weight);
-					float roll = Main.rand.NextFloat() * totalWeight;
-					float cumulative = 0f;
+					float totalWeight = list.Sum(x => x.Weight); // Sum up the total weight of all of the items in the pool.
+					float roll = Main.rand.NextFloat() * totalWeight; // Generate a random number from 0 to 1 and multiply it by the total weight.
+					float cumulative = 0f; // Keep track of the running total weight of each item (used below).
 
+					// For each item in the pool
 					for (int j = 0; j < list.Count; j++)
 					{
-						//Main.NewText($"Found Item {list[j].Item.Name} {list[j].Item.netID}");
-						cumulative += list[j].Weight;
-						if (roll <= cumulative)
+						// Main.NewText($"{i} {Slots} {j} {list.Count} Found Item {list[j].Item.Name} {list[j].Item}");
+						cumulative += list[j].Weight; // Add the item's weight to the running total
+
+						// If the roll was less than or equal to the running total, add the item to the shop.
+						if (roll <= cumulative) 
 						{
 							// Main.NewText($"  Chose this item {list[j].Item.Name}");
-							yield return list[j].Item;
+							yield return list[j].Item; // Return the item that was selected.
+							list.RemoveAt(j); // Remove the item from the list so it can't be selected again.
+							break; // Stop trying to roll for items in this slot because we already selected an item.
 						}
-						list.RemoveAt(j);
+						// If an item was not selected, try the next item in the list.
 					}
-
-					/*
-					foreach (var item in list)
-					{
-						cumulative += item.Weight;
-						if (roll <= cumulative)
-						{
-							Main.NewText($"Chose this item {item.Item.Name}");
-							yield return item.Item;
-							list.Remove(item);
-						}
-					}
-					*/
-
-					/*
-					int k = Main.rand.Next(list.Count);
-					yield return list[k].Item;
-
-					// remove the entry from the list so it can't be selected again this pick
-					list.RemoveAt(k);
-					*/
 				}
+				/* Big example:
+					The Swords pool is like this:
+						Choose 3 items from this list
+						|		Item		|	Weight	|
+						CopperBroadsword		1f
+						TinBroadsword			1f
+						IronBroadsword			0.5f
+						LeadBroadsword			0.5f
+						SilverBroadsword		1f
+						TungstenBroadsword		1f
+						GoldBroadsword			2f
+						PlatinumBroadsword		2f
+						FieryGreatsword			10f
+
+					For slot number 1:
+						Add up all of the weights of the items:							totalWeight = 19f
+						Generate a random number:										roll = (0.554 * 19) = 10.526
+						Keep track of the running total weights, which right now is 0:	cumulative = 0f
+						
+						For each item in the pool:
+							The first item is the CopperBroadsword with a weight of 1
+								Add it's weight to the running total:	cumulative += 1 == 1
+								Is the roll <= to the cumulative?
+									roll == 10.526 and cumulative == 1, so no.
+									Move onto the next item.
+							The next item is the TinBroadsword with a weight of 1
+								Add it's weight to the running total:	cumulative += 1 == 2
+								Is the roll <= to the cumulative?
+									roll == 10.526 and cumulative == 2, so no.
+									Move onto the next item.
+							...
+							Nothing has been chosen yet until we reach the FieryGreatsword with a weight of 10
+								Add it's weight to the running total:	cumulative += 10 == 19
+								Is the roll <= to the cumulative?
+									roll == 10.526 and cumulative == 19, so yes!
+									Add the FieryGreatsword
+									Remove it from the list so it cannot be chosen again.
+						Now we've selected the first item out of the three, so lets choose the next item.
+
+					For slot number 2:
+						Add up all of the weights of the items:							totalWeight = 9f
+																							Remember that the FieryGreatsword is no longer in the list, so the total weight is less.
+						Generate a random number:										roll = (0.2206 * 9) = 1.986
+						Keep track of the running total weights, which right now is 0:	cumulative = 0f
+
+						For each item in the pool:
+							The first item is the CopperBroadsword with a weight of 1
+								Add it's weight to the running total:	cumulative += 1 == 1
+								Is the roll <= to the cumulative?
+									roll == 1.986 and cumulative == 1, so no.
+									Move onto the next item.
+							The next item is the TinBroadsword with a weight of 1
+								Add it's weight to the running total:	cumulative += 1 == 2
+								Is the roll <= to the cumulative?
+									roll == 1.986 and cumulative == 2, so yes!
+									Add the TinBroadsword
+									Remove it from the list so it cannot be chosen again.
+						Now we've selected the second item out of the three, so lets choose the next item.
+
+					For slot number 3:
+						Add up all of the weights of the items:							totalWeight = 8f
+						Generate a random number:										roll = (0.221 * 8) = 1.768
+						Keep track of the running total weights, which right now is 0:	cumulative = 0f
+					
+						For each item in the pool:
+							The first item is the CopperBroadsword with a weight of 1
+								Add it's weight to the running total:	cumulative += 1 == 1
+								Is the roll <= to the cumulative?
+									roll == 1.768 and cumulative == 1, so no.
+									Move onto the next item.
+							The next item is the IronBroadsword (Not the TinBroadsword because that was already selected) with a weight of 0.5
+								Add it's weight to the running total:	cumulative += 0.5 == 1.5
+								Is the roll <= to the cumulative?
+									roll == 1.986 and cumulative == 1.5, so no.
+									Move onto the next item.
+							The next item is the LeadBroadsword with a weight of 0.5
+								Add it's weight to the running total:	cumulative += 0.5 == 2
+								Is the roll <= to the cumulative?
+									roll == 1.986 and cumulative == 2, so yes!
+									Add the LeadBroadsword
+									Remove it from the list so it cannot be chosen again.
+						Now we've selected all three items, so we are done!
+
+					The order of the items in the list can have an effect on the outcome.
+					For extra randomness, we could shuffle the list first. list = list.Shuffle().ToList();
+				*/
 			}
 		}
 
 		public List<Pool> Pools { get; } = new();
 
-		public override IEnumerable<Entry> ActiveEntries => Pools.SelectMany(p => p.Entries).Where(e => !e.Disabled);
+		public IEnumerable<WeightedEntry> WeightedEntries => Pools.SelectMany(p => p.Entries).Where(e => !e.Disabled);
 
-		public Pool AddPool(string name, int slots, float weight = 1f)
+		protected override IEnumerable<Entry> AllEntries => Pools.SelectMany(p => p.Entries);
+
+		public override void RefreshItems(bool onlyIfVariantChanged = true)
 		{
-			var pool = new Pool(name, slots, new List<Entry>(), weight);
+			foreach (var entry in WeightedEntries)
+			{
+				entry.Item.Refresh(onlyIfVariantChanged);
+			}
+		}
+
+		public Pool AddPool(string name, int slots)
+		{
+			var pool = new Pool(name, new Func<int>( () => slots ), new List<WeightedEntry>());
+			Pools.Add(pool);
+			return pool;
+		}
+
+		public Pool AddPool(string name, Func<int> slots)
+		{
+			var pool = new Pool(name, slots, new List<WeightedEntry>());
 			Pools.Add(pool);
 			return pool;
 		}

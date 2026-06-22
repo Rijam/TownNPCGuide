@@ -1,4 +1,5 @@
 using Terraria;
+using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -53,6 +54,26 @@ namespace TownNPCGuide.Common.Systems
 					}
 					break;
 			}
+		}
+
+		// This hook lets you do things before the chat buttons are clicked.
+		// See Example Mod GlobalNPCInteractions for more examples:
+		// https://github.com/tModLoader/tModLoader/blob/1.4.5/ExampleMod/Common/GlobalNPCs/GobalNPCInteractions.cs
+		public override bool PreChatButtonClicked(NPC npc, NPCInteraction interaction)
+		{
+			// Main.NewText($"PreChatButtonClicked {interaction.GetText()} was clicked from the GlobalNPC!");
+			// if (interaction is NPCInteractions.Actions.CloseChat)
+			// {
+				// Main.NewText($"PreChatButtonClicked returning false!!");
+				// return false;
+			// }
+			return base.PreChatButtonClicked(npc, interaction);
+		}
+
+		// This hook lets you do things when chat buttons are clicked.
+		public override void OnChatButtonClicked(NPC npc, NPCInteraction interaction)
+		{
+			// Main.NewText($"Button {interaction.GetText()} was clicked from the GlobalNPC!");
 		}
 	}
 }

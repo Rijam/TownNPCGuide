@@ -73,9 +73,9 @@ namespace TownNPCGuide.Content.Items
 		private int frameCounter = 0; // Counter for the frame rate.
 		private readonly int frameRate = 6; // 6 ticks per frame; matches vanilla coins.
 		private readonly int frameCount = 8; // 8 total frames in our animation.
-		
+
 		// Our item is a still frame, but we want it to be animated when we throw it on the ground.
-		public override bool PreDrawInWorld(SpriteBatch spriteBatch, Color lightColor, Color alphaColor, ref float rotation, ref float scale, int whoAmI)
+		public override bool PreDrawInWorld(WorldItem item, SpriteBatch spriteBatch, Color lightColor, Color alphaColor, ref float rotation, ref float scale, int whoAmI)
 		{
 			// Increase the frame every frameRate ticks and then set it back to 0 if it goes above the frameCount.
 			if (frameCounter++ >= frameRate)
@@ -91,7 +91,7 @@ namespace TownNPCGuide.Content.Items
 			Rectangle sourceRectangle = TutorialCurrencyCoinAnimated.Frame(1, 8, frameY: frame);
 
 			// Get the position of the item.
-			Vector2 position = Item.position - Main.screenPosition;
+			Vector2 position = item.position - Main.screenPosition;
 
 			// Draw the item in the world.
 			spriteBatch.Draw(TutorialCurrencyCoinAnimated.Value, position, sourceRectangle, lightColor, rotation, default, scale, SpriteEffects.None, 0f);
@@ -99,12 +99,12 @@ namespace TownNPCGuide.Content.Items
 			return false; // Return false so the original sprite doesn't draw as well.
 		}
 
-		public override void PostDrawInWorld(SpriteBatch spriteBatch, Color lightColor, Color alphaColor, float rotation, float scale, int whoAmI)
+		public override void PostDrawInWorld(WorldItem item, SpriteBatch spriteBatch, Color lightColor, Color alphaColor, float rotation, float scale, int whoAmI)
 		{
 			// Spawn some dusts on the coin when thrown in the world.
-			if (!Main.gamePaused && Main.instance.IsActive && lightColor.R > 60 && Main.rand.Next(500) - (Math.Abs(Item.velocity.X) + Math.Abs(Item.velocity.Y)) * 10f < (lightColor.R / 50f))
+			if (FocusHelper.AllowWorldItemsToEmitEffects && lightColor.R > 60 && Main.rand.Next(500) - (Math.Abs(item.velocity.X) + Math.Abs(item.velocity.Y)) * 10f < (lightColor.R / 50f))
 			{
-				int sparkleDust = Dust.NewDust(Item.position, Item.width, Item.height, DustID.PlatinumCoin, 0f, 0f, 0, Color.White, 1f);
+				int sparkleDust = Dust.NewDust(item.position, Item.width, Item.height, DustID.PlatinumCoin, 0f, 0f, 0, Color.White, 1f);
 				Main.dust[sparkleDust].velocity *= 0f;
 			}
 		}

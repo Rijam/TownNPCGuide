@@ -9,6 +9,7 @@ using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.Utilities;
 using TownNPCGuide.Content.Items;
+using TownNPCGuide.Content.EmoteBubbles;
 
 namespace TownNPCGuide.Content.NPCs.TownNPCs.TutorialSkeletonMerchant
 {
@@ -45,7 +46,7 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TutorialSkeletonMerchant
 
 			// Connects this NPC with a custom emote.
 			// This makes it when the NPC is in the world, other NPCs will "talk about him".
-			// NPCID.Sets.FaceEmote[Type] = ModContent.EmoteBubbleType<ExampleBoneMerchantEmote>();
+			NPCID.Sets.FaceEmote[Type] = ModContent.EmoteBubbleType<TutorialSkeletonMerchantEmote>();
 
 			// The vanilla Skeleton Merchant cannot interact with doors (open or close them, specifically), but if you want your NPC to be able to interact with them despite this,
 			// uncomment this line below.
@@ -63,6 +64,13 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TutorialSkeletonMerchant
 				new Profiles.DefaultNPCProfile(Texture, -1, Texture + "_Party"),
 				new Profiles.DefaultNPCProfile(Texture + "_Shimmer", -1, Texture + "_Shimmer_Party")
 			);
+
+			// Here we define which portrait to use for the Town NPC when the portrait style setting is set to detailed.
+			NPCID.Sets.NPCPortraits.Add(Type, NPCID.Sets.PrioritizedPortrait()
+				.With(NPCID.Sets.ShimmeredPortraitCondition, NPCID.Sets.BasicPortrait($"{Texture}_Shimmer_Portrait"))
+				.Default(NPCID.Sets.BasicPortrait($"{Texture}_Portrait")));
+			NPCID.Sets.NPCPortraitsCloseUpOffsets.Add(Type, new Vector2(0f, 0f)); // Here we can change the offsets of Town NPC when the portrait style setting is set to profile.
+			NPCID.Sets.NPCPortraitsFullBodyRetroOffsets.Add(Type, new Vector2(0f, 0f)); // Here we can change the offsets of Town NPC when the portrait style setting is set to retro.
 
 			// In vanilla, Skeleton enemies can't harm the Skeleton Merchant.
 			// You might try to add this set so Skeletons can't harm your NPC, but it won't work like that.
@@ -142,9 +150,9 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TutorialSkeletonMerchant
 			return Language.FindAll(Lang.CreateDialogFilter(this.GetLocalizationKey("Names"))).Select(x => x.Value).ToList();
 		}
 
-		public override float SpawnChance(NPCSpawnInfo spawnInfo) {
+		public override float SpawnChance(NPC.Spawner spawner) {
 			// If any player is the caverns layer and doesn't already exist, the Tutorial Skeleton Merchant will have a slight chance to spawn.
-			if (spawnInfo.Player.ZoneRockLayerHeight && NPC.CountNPCS(Type) == 0) {
+			if (spawner.Player.ZoneRockLayerHeight && NPC.CountNPCS(Type) == 0) {
 				return 0.14f;
 			}
 
@@ -168,14 +176,12 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TutorialSkeletonMerchant
 			return chat; // chat is implicitly cast to a string.
 		}
 
-		public override void SetChatButtons(ref string button, ref string button2) { // What the chat buttons are when you open up the chat UI
-			button = Language.GetTextValue("LegacyInterface.28"); //This is the key to the word "Shop"
-		}
-
-		public override void OnChatButtonClicked(bool firstButton, ref string shop) {
-			if (firstButton) {
-				shop = "Shop";
-			}
+		// This hooks is where we register which buttons will show up when interacting the Town NPC.
+		// The "Close", "Happiness", and "Housing" buttons are automatically registered first.
+		// This NPC isn't affected by happiness, so the "Happiness" and "Housing" buttons won't show up.
+		public override void RegisterChatButtons(NPCInteractionList interactions)
+		{
+			interactions.InsertBefore(NPCInteractions.Shop(), NPCInteractionDatabase.CloseButton);
 		}
 
 		public override void AddShops() {

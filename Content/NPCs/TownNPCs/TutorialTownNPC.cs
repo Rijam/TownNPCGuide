@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
+using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.Chat;
@@ -13,10 +14,10 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.Utilities;
-using TownNPCGuide.Content.Items;
-using TownNPCGuide.EmoteBubbles;
-using TownNPCGuide.Content.Currencies;
 using TownNPCGuide.Common.Systems;
+using TownNPCGuide.Content.Currencies;
+using TownNPCGuide.Content.Items;
+using TownNPCGuide.Content.EmoteBubbles;
 
 namespace TownNPCGuide.Content.NPCs.TownNPCs
 {
@@ -80,9 +81,9 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs
 				// All of the vanilla Town NPCs only LIKE and DISLIKE one biome, but we can set LOVE and HATE as well as many as we want.
 				.SetBiomeAffection<HallowBiome>(AffectionLevel.Love) // Our Town NPC will love the Hallow.
 				.SetBiomeAffection<ForestBiome>(AffectionLevel.Like) // Our Town NPC will like the Forest.
+				.SetBiomeAffection<JungleBiome>(AffectionLevel.Like) // Our Town NPC will like the Forest.
 				.SetBiomeAffection<DesertBiome>(AffectionLevel.Dislike) // Our Town NPC will dislike the Desert.
 				.SetBiomeAffection<UndergroundBiome>(AffectionLevel.Dislike) // Our Town NPC will hate the Underground/Caverns/Underworld.
-				.SetBiomeAffection<DungeonBiome>(AffectionLevel.Love)
 
 				.SetNPCAffection(NPCID.Guide, AffectionLevel.Love) // Our Town NPC loves living near the Guide.
 				.SetNPCAffection(NPCID.PartyGirl, AffectionLevel.Like) // Our Town NPC likes living near the Party Girl.
@@ -98,7 +99,14 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs
 				new Profiles.DefaultNPCProfile(Texture, NPCHeadLoader.GetHeadSlot(HeadTexture), Texture + "_Party"),
 				new Profiles.DefaultNPCProfile(Texture + "_Shimmer", ShimmerHeadIndex, Texture + "_Shimmer_Party")
 			);
-			
+
+			// Here we define which portrait to use for the Town NPC when the portrait style setting is set to detailed.
+			NPCID.Sets.NPCPortraits.Add(Type, NPCID.Sets.PrioritizedPortrait()
+				.With(NPCID.Sets.ShimmeredPortraitCondition, NPCID.Sets.BasicPortrait($"{Texture}_Shimmer_Portrait"))
+				.Default(NPCID.Sets.BasicPortrait($"{Texture}_Portrait")));
+			NPCID.Sets.NPCPortraitsCloseUpOffsets.Add(Type, new Vector2(-3f, 0f)); // Here we can change the offsets of Town NPC when the portrait style setting is set to profile.
+			NPCID.Sets.NPCPortraitsFullBodyRetroOffsets.Add(Type, new Vector2(0f, 0f)); // Here we can change the offsets of Town NPC when the portrait style setting is set to retro.
+
 			// Advanced - ITownNPCProfile()
 			// NPCProfile = new TutorialTownNPCProfile();
 		}
@@ -240,6 +248,8 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs
 		}
 
 		public override string GetChat() {
+			//NPCInteractions.All.Add(new NPCInteractions.Actions.OpenShop(Type, 2, "Button with a really long name"));
+
 			// WeightedRandom<string> is an easy and convenient way to add chat. We don't have to deal with making our own randomness or deal with large switch/if else statements.
 			WeightedRandom<string> chat = new();
 
@@ -299,28 +309,107 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs
 			return chat;
 		}
 
-		public override void SetChatButtons(ref string button, ref string button2) {
-			button = Language.GetTextValue("LegacyInterface.28"); // This will automatically be translated to say "Shop".
+		// This hooks is where we register which buttons will show up when interacting the Town NPC.
+		// The "Close", "Happiness", and "Housing" buttons are automatically registered first.
+		public override void RegisterChatButtons(NPCInteractionList interactions)
+		{
+			// Here we are registering our shop button before the close button.
+			interactions.InsertBefore(NPCInteractions.Shop(Shop1), NPCInteractionDatabase.CloseButton);
+			// NPCInteractionDatabase predefines CloseButton, HappinessButton, HousingButton, and PetButton.
+			// You can use:
+			// interactions.InsertBefore will add it before another button.
+			// interactions.InsertAfter will add it after another button.
+			// interactions.Append will add it to the end of the list.
+			// interactions.Prepend will add it to the beginning of list.
+			// interactions.Disable will disable a button from showing up while still keeping it in the list internally.
+
+			// Here are a bunch of other examples for registering buttons.
+
+			// Here we are registering shop buttons for shops from other Town NPCs
+			// For vanilla Town NPCs, use Terraria/NPCInternalName/Shop (or Decor for the Painter's second shop).
+			// For modded town NPCs, use ModName/NPCInternalName/ShopName with ShopName being the name of the shop was called in the code.
+			interactions.InsertBefore(NPCInteractions.Shop("Terraria/Painter/Shop", "Painter Shop"), NPCInteractionDatabase.HappinessButton);
+			interactions.InsertBefore(NPCInteractions.Shop("Terraria/Painter/Decor", "Painter Decor"), NPCInteractionDatabase.HappinessButton);
+			interactions.InsertBefore(NPCInteractions.Shop("TownNPCGuide/TutorialSkeletonMerchant/Shop", "Tutorial Skel Merch"), NPCInteractionDatabase.HappinessButton);
 			
-			// We can add a second button to our Town NPC by assigning button2. In this case, the second button will only appear during the day time.
-			if (Main.dayTime) {
-				button2 = Language.GetTextValue("Mods.TownNPCGuide.NPCs.TutorialTownNPC.UI.SecondButton");
+			// Here is another way to add a vanilla shop.
+			interactions.InsertBefore(NPCInteractions.Shop(NPCShopDatabase.GetShopNameFromVanillaIndex(1), "VanillaShop1"), NPCInteractionDatabase.HappinessButton);
+			
+			// Here we are registering a custom button. See below for the custom button.
+			interactions.InsertBefore(new OpenShopDayOnly(Shop2, "Mods.TownNPCGuide.NPCs.TutorialTownNPC.UI.SecondButton"), NPCInteractionDatabase.HappinessButton);
+			
+			// We can save the result from registering a button and use it later.
+			NPCInteractionList.Entry vanillaShop2Entry = interactions.InsertBefore(NPCInteractions.Shop(NPCShopDatabase.GetShopNameFromVanillaIndex(2), "VanillaShop2"), NPCInteractionDatabase.HappinessButton);
+			interactions.InsertAfter(new OpenShopDayOnly2(Shop2, "Shop 2 again"), vanillaShop2Entry);
+		}
+
+		// This a custom chat button that a modified copy of the NPCInteraction.Actions.OpenShop
+		// This button will only show up when it is day time.
+		// It will also be color.
+		public class OpenShopDayOnly(string shopName, string customTextKey = null) : NPCInteraction
+		{
+			private string _shopName = shopName;
+			private string _customTextKey = customTextKey;
+
+			public override bool Condition() => Main.dayTime; // Make this button only show up during the day time.
+
+			public override string GetText()
+			{
+				if (_customTextKey != null)
+					return Language.GetTextValue(_customTextKey);
+
+				return Lang.inter[28].Value;
+			}
+
+			public override void Interact()
+			{
+				Main.instance.OpenShop(NPCShopDatabase.GetShopName(LocalPlayer.TalkNPC.type, _shopName));
+			}
+
+			// This hook lets you customize the color the chat button.
+			public override void TextColor(ref Color chatColor, ref Color chatColorShadow, bool hoveringOverButton)
+			{
+				if (hoveringOverButton)
+				{
+					// Set the color to orange when hovering over the button.
+					// Multiply the color by * (Main.mouseTextColor / 255f) to give it that pulsating effect that text in Terraria has.
+					chatColor = Color.Orange * (Main.mouseTextColor / 255f);
+				}
 			}
 		}
 
-		public override void OnChatButtonClicked(bool firstButton, ref string shop) {
-			// If the first button, the shop button, was clicked, open the shop.
-			if (firstButton) {
-				shop = Shop1;
-			}
-			// If the button that was clicked wasn't the first button, aka it was the second button, do something else.
-			// In this case, we are setting the text to something else and opening the second shop.
-			// (The Close or Happiness buttons are not considered here.)
-			if (!firstButton) {
-				// Main.npcChatText = Language.GetTextValue("Mods.TownNPCGuide.NPCs.TutorialTownNPC.Dialogue.SecondButtonChat");
-				shop = Shop2;
+		// This a custom chat button that inherits NPCInteraction.Actions.OpenShop and makes changes.
+		// This button will only show up when it is day time.
+		// It will also be color.
+		public class OpenShopDayOnly2(string shopName, string customTextKey = null) : NPCInteractions.Actions.OpenShop(shopName, customTextKey) // Inherit the vanilla shop button.
+		{
+			// Make this button only show up during the day time. Calling base is important just in case the parent class has its own condition.
+			public override bool Condition() => base.Condition() && Main.dayTime;
+
+			public override bool ShowExcalmation => true; // Makes the button have a small exclamation point next it.
+
+			// This hook lets you customize the color the chat button.
+			public override void TextColor(ref Color chatColor, ref Color chatColorShadow, bool hoveringOverButton)
+			{
+				// Set the color to black and the shadow to light gray.
+				// Multiply the color by * (Main.mouseTextColor / 255f) to give it that pulsating effect that text in Terraria has.
+				chatColor = Color.Black * (Main.mouseTextColor / 255f);
+				chatColorShadow = Color.LightGray;
+
+				if (hoveringOverButton)
+				{
+					// Set the color to dark gray and the shadow to white when hovering over the button.
+					chatColor = Color.DarkGray * (Main.mouseTextColor / 255f);
+					chatColorShadow = Color.White;
+				}
 			}
 		}
+
+		// This hook lets you do things when chat buttons are clicked.
+		// public override void OnChatButtonClicked(NPCInteraction interaction)
+		// {
+			// Main.NewText($"Button {interaction.GetText()} was clicked from the ModNPC!");
+		// }
 
 		public override void AddShops() {
 			// First, create our new shop.
@@ -777,19 +866,37 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs
 
 		// Load our textures
 		private readonly Asset<Texture2D> glowMask = ModContent.Request<Texture2D>("TownNPCGuide/Content/NPCs/TownNPCs/Advanced/TutorialTownNPC_GlowMask");
+		private readonly Asset<Texture2D> shimmerGlowMask = ModContent.Request<Texture2D>("TownNPCGuide/Content/NPCs/TownNPCs/Advanced/TutorialTownNPC_Shimmer_GlowMask");
 		private readonly Asset<Texture2D> glowMaskAttacking = ModContent.Request<Texture2D>("TownNPCGuide/Content/NPCs/TownNPCs/Advanced/TutorialTownNPC_GlowMaskAttacking");
 		public override void PostDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor) {
 			// Flip the glow mask to match which direction the Town NPC is facing.
 			SpriteEffects spriteEffects = NPC.spriteDirection > 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
 			// Draw our glow mask in full bright.
-			Color color = Color.White;
+			// GetShimmerColor will modify the alpha while the Town NPC is shimmer transforming.
+			Color color = NPC.GetShimmerColor(Color.White);
 
 			// Move the position up by 4 pixels plus the gfxOffY value (that is for climbing half blocks).
 			// Main.NPCAddHeight() makes it so if the Town NPC is sitting, it also moves the glow mask up by 4 more pixels.
 			Vector2 verticalOffset = new(0, -4 + NPC.gfxOffY + Main.NPCAddHeight(NPC));
 
+			// If the NPC is actually a dummy for the Profile and Retro portrait:
+			if (NPC.IsAPortraitDummy) {
+				// The Profile dummy will have a scale of 3f. The Retro portrait will have a scale of 2f.
+				verticalOffset.Y += NPC.scale == 2f ? -28 : -56; // Move our drawing up.
+
+				// The offsets from NPCID.Sets.NPCPortraitsCloseUpOffsets and NPCID.Sets.NPCPortraitsFullBodyRetroOffsets are already taken into account.
+
+				// A similar thing can be done with NPC.IsABestiaryIconDummy if the image in the bestiary doesn't line up.
+			}
+
+			// Change the glow mask to the shimmer glow mask if the NPC is the shimmer variant.
+			Asset<Texture2D> glowMaskToDraw = glowMask;
+			if (NPC.IsShimmerVariant) {
+				glowMaskToDraw = shimmerGlowMask;
+			}
+
 			// Draw our glow mask
-			spriteBatch.Draw(glowMask.Value, NPC.Center - screenPos + verticalOffset, NPC.frame, color, NPC.rotation, NPC.frame.Size() / 2f, NPC.scale, spriteEffects, 1f);
+			spriteBatch.Draw(glowMaskToDraw.Value, NPC.Center - screenPos + verticalOffset, NPC.frame, color, NPC.rotation, NPC.frame.Size() / 2f, NPC.scale, spriteEffects, 1f);
 
 			// Only draw our extra attacking glow mask while attacking, which are frames 21+
 			if (NPC.frame.Y > 20 * NPC.frame.Height) { 

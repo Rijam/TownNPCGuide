@@ -25,7 +25,7 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs
 			NPC.friendly = true;
 			NPC.width = 28;
 			NPC.height = 32;
-			NPC.aiStyle = 0; // aiStyle of 0 is used. The NPC will not move.
+			NPC.aiStyle = NPCAIStyleID.FaceClosestPlayer; // aiStyle of 0 is used. The NPC will not move.
 			NPC.damage = 10;
 			NPC.defense = 15;
 			NPC.lifeMax = 250;
@@ -73,12 +73,12 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs
 			return Language.GetTextValue("Mods.TownNPCGuide.NPCs.TutorialTownNPC.Dialogue.OnRescue");
 		}
 
-		public override float SpawnChance(NPCSpawnInfo spawnInfo)
+		public override float SpawnChance(NPC.Spawner spawner)
 		{
 			// In this example, the bound NPC can spawn at the surface on grass, dirt, or hallowed grass.
 			// We also make sure not spawn the bound NPC if it has already spawned or if the NPC has already been rescued.
-			if (spawnInfo.Player.ZoneOverworldHeight && !TownNPCGuideWorld.rescuedTutorialTownNPC && !NPC.AnyNPCs(ModContent.NPCType<BoundTutorialTownNPC>()) && !NPC.AnyNPCs(ModContent.NPCType<TutorialTownNPC>())) {
-				if (spawnInfo.SpawnTileType == TileID.Grass || spawnInfo.SpawnTileType == TileID.Dirt || spawnInfo.SpawnTileType == TileID.HallowedGrass) {
+			if (spawner.Player.ZoneOverworldHeight && !TownNPCGuideWorld.rescuedTutorialTownNPC && !NPC.AnyNPCs(ModContent.NPCType<BoundTutorialTownNPC>()) && !NPC.AnyNPCs(ModContent.NPCType<TutorialTownNPC>())) {
+				if (spawner.SpawnTileType == TileID.Grass || spawner.SpawnTileType == TileID.Dirt || spawner.SpawnTileType == TileID.HallowedGrass) {
 					return 0.75f;
 				}
 			}

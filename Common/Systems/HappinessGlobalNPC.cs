@@ -13,9 +13,11 @@ namespace TownNPCGuide.Common.Systems
 
 			var guideHappiness = NPCHappiness.Get(NPCID.Guide); // Get the Guide's happiness.
 			var goblinTinkererHappiness = NPCHappiness.Get(NPCID.GoblinTinkerer); // Get the Goblin Tinkerer's happiness.
+			var zoologistHappiness = NPCHappiness.Get(NPCID.BestiaryGirl); // Get the Zoologist's happiness.
 
 			guideHappiness.SetNPCAffection(tutorialTownNPC, AffectionLevel.Like); // Make the Guide like our Town NPC.
 			goblinTinkererHappiness.SetNPCAffection(tutorialTownNPC, AffectionLevel.Dislike); // Make the Goblin Tinkerer dislike our Town NPC.
+			zoologistHappiness.SetNPCAffection(tutorialTownNPC, AffectionLevel.Like); // Make the Zoologist like our Town NPC.
 
 			// Cross mod happiness
 

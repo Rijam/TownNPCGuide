@@ -1,7 +1,7 @@
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameContent.Bestiary;
@@ -10,6 +10,7 @@ using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.Utilities;
 using TownNPCGuide.Common.Systems;
+using TownNPCGuide.Content.EmoteBubbles;
 
 namespace TownNPCGuide.Content.NPCs.TownNPCs.TownPets
 {
@@ -64,6 +65,21 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TownPets
 			NPCID.Sets.NPCBestiaryDrawOffset.Add(Type, drawModifiers);
 
 			NPCProfile = new TutorialTownPetProfile(); // Assign our profile.
+
+			// Connects this NPC with a custom emote.
+			// This makes it when the NPC is in the world, other NPCs will "talk about him".
+			NPCID.Sets.FaceEmote[Type] = ModContent.EmoteBubbleType<TutorialTownPetEmote>();
+
+			// Here we define which portrait to use for the Town NPC when the portrait style setting is set to detailed.
+			NPCID.Sets.NPCPortraits.Add(Type, NPCID.Sets.PrioritizedPortrait()
+				.With(NPCID.Sets.VariantPortraitCondition(0), NPCID.Sets.BasicPortrait($"{Texture}_Portrait"))
+				.With(NPCID.Sets.VariantPortraitCondition(1), NPCID.Sets.BasicPortrait($"{Texture}_1_Portrait"))
+				.With(NPCID.Sets.VariantPortraitCondition(2), NPCID.Sets.BasicPortrait($"{Texture}_2_Portrait"))
+				.With(NPCID.Sets.VariantPortraitCondition(3), NPCID.Sets.BasicPortrait($"{Texture}_3_Portrait"))
+				.With(NPCID.Sets.VariantPortraitCondition(4), NPCID.Sets.BasicPortrait($"{Texture}_4_Portrait"))
+				.Default(NPCID.Sets.BasicPortrait($"{Texture}_Portrait")));
+			NPCID.Sets.NPCPortraitsCloseUpOffsets.Add(Type, new Vector2(0f, 0f)); // Here we can change the offsets of Town NPC when the portrait style setting is set to profile.
+			NPCID.Sets.NPCPortraitsFullBodyRetroOffsets.Add(Type, new Vector2(0f, 0f)); // Here we can change the offsets of Town NPC when the portrait style setting is set to retro.
 		}
 		public override void SetDefaults()
 		{
@@ -150,11 +166,6 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs.TownPets
 			chat.Add("*Tutorial Town Pet noises*");
 
 			return chat;
-		}
-
-		public override void SetChatButtons(ref string button, ref string button2)
-		{
-			button = Language.GetTextValue("UI.PetTheAnimal"); // Pet
 		}
 
 		public override bool CanGoToStatue(bool toKingStatue)

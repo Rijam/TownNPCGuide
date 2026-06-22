@@ -33,6 +33,21 @@ Mods: {
 					HateNPC: I hate {NPCName}!
 					# This will set the Princess' dialogue for your Town NPC. This ONLY works for the Princess. It will not work for any other Town NPC.
 					Princess_LovesNPC: I love {NPCName}'s work!
+					# Specific dialogue text can be defined as well.
+					# These quotes are optional and will be used instead of the generic dialogue above.
+					# They need to follow the pattern of [AffectionLevel](NPC or Biome)_[NPCInternalName]
+					# Modded NPCs need mod name as well: ExampleMod/ExamplePerson
+					LikeNPC_PartyGirl: "{NPCName} knows how to party!"
+					LikeBiome_Jungle: I specificly like {BiomeName}
+					LikeNPC_BestiaryGirl: I specificly like {NPCName}
+					LoveNPC_ExampleMod/ExamplePerson: I cross mod love {NPCName}!
+					# We can also give other NPCs specific dialogue text for this Modded NPC.
+					# They need to follow the pattern of [NPCInternalName]_[AffectionLevel]s(NPC)
+					Guide_LikesNPC: I specificly like {NPCName}
+					ExampleMod/ExamplePerson_LovesNPC: I love {NPCName} cross moddedly!
+					# Zoologist is a special case because she has a second set of dialogue when transformed.
+					BestiaryGirl_LikesNPC: I specificly like {NPCName}
+					Transformed.BestiaryGirl_LikesNPC: Me specificly like {NPCName}
 				}
 
 				Dialogue: {
@@ -54,22 +69,46 @@ Mods: {
 
 				UI.SecondButton: Hi there!
 				Bestiary: This NPC is here to teach all about creating your own Town NPCs!
+				# Town NPCs who are homeless have a "Housing" button that displays their "NoHome" dialogue as well as a hint on what valid housing is. The hint text can be customized through the localization file.
+				# Default hint:			(In order for a room to be considered a home, it needs to have a door, a chair, a table, and a light source.  Make sure the house has walls as well.)
+				# Hint for the truffle: (In order for {NPCName} to consider a home, it needs to be in Glowing Mushroom Fields and have a door, a chair, a table, and a light source.  Make sure the house has walls as well.)
+				# {NPCName} is a placeholder and will be replaced with the NPC's full name.
+				HousingText.HousingRequirements: (Yo this house is not valid for me! I need a home in a surface Hallow biome!)
 			}
 
 			BoundTutorialTownNPC.DisplayName: Bound Tutorial Town NPC
 
-			TutorialSkeletonMerchant: {
-				DisplayName: Tutorial Skeleton Merchant
-				Census.SpawnCondition: TBD
+			TutorialTravelingMerchant: {
+				DisplayName: Tutorial Traveling Merchant
 
 				Dialogue: {
-					StandardDialogue1: Hello!
-					StandardDialogue2: Reading up on those tutorials I see!
-					StandardDialogue3: All this coding is confusing...
-					StandardDialogue4: Have you met my buddy Example Person?
+					StandardDialogue1: Greetings traveler! Wait, I'm the one who travels.
+					StandardDialogue2: Check out my Simple Shop for a shop that unintelligently randomly selects the available items.
+					StandardDialogue3: Check out my Advanced Shop for a shop that has many categories with item weights!
+					StandardDialogue4: Don't like what you see? Reroll my shops and I'll sell something different!
+					RerollShopDialogue: I've rerolled the shops!
 				}
 
-				Bestiary: TBH
+				UI: {
+					SimpleShop: Simple Shop
+					AdvancedShop: Advanced Shop
+					RerollShops: Reroll shops
+				}
+
+				Bestiary: This traveling salesman has two shops with different levels of complexity.
+			}
+
+			TutorialSkeletonMerchant: {
+				DisplayName: Tutorial Skeleton Merchant
+
+				Dialogue: {
+					StandardDialogue1: Good to see you. Don't go too far from me, or I'll despawn!
+					StandardDialogue2: I may look and act like a Town NPC, but technically I am not.
+					StandardDialogue3: Check your Lifeform Analyzer; see my name on it?
+					StandardDialogue4: When I'm around I have the effect of reducing enemy spawns.
+				}
+
+				Bestiary: This mysterious person is not classified as a Town NPC, yet they still act like one. They don't look like a skeleton to me, though.
 
 				Names: {
 					Boney: Boney
@@ -82,6 +121,7 @@ Mods: {
 				DisplayName: Tutorial Town Pet
 				Census.SpawnCondition: Use a Tutorial Town Pet License
 				Bestiary: A cute Tutorial Town Pet. Everyone's favorite species of pet!
+				TownNPCMood.NoHome: *Tutorial Town Pet noises*?
 			}
 
 			Guide.Dialogue.ModdedDialogue: Hi there, hello! This line was added by Town NPC Guide!
@@ -96,8 +136,6 @@ Mods: {
 					Standard3: It is very important that you know the difference between a cog, gear, and a sprocket!
 				}
 			}
-
-			TutorialTravelingMerchant.DisplayName: Tutorial Traveling Merchant
 		}
 
 		Conditions: {
@@ -129,7 +167,12 @@ Mods: {
 			}
 		}
 
-		Emotes.TutorialTownNPCEmote.Command: tnpcgtutorialtownnpc
+		Emotes: {
+			TutorialTownNPCEmote.Command: tnpcgtutorialtownnpc
+			TutorialTravelingMerchantEmote.Command: tnpcgtutorialtravelingmerchant
+			TutorialSkeletonMerchantEmote.Command: tnpcgtutorialskeletonmerchant
+			TutorialTownPetEmote.Command: tnpcgtutorialtownpet
+		}
 
 		Currency: {
 			TutorialCurrency: Tutorial Currency Coins
@@ -139,10 +182,20 @@ Mods: {
 	}
 }
 
-# The following shouldn't be necessary if you use Princess_LovesNPC
+# Here is how you can add specific happiness dialogue text for vanilla NPCs talking about biomes or vanilla NPCs talking about vanilla NPCs.
+# For the vanilla NPC talking about your Modded NPC, put the dialogue in the Modded NPC's TownNPCMood. See ExamplePerson for details.
+TownNPCMood_Guide: {
+	LikeNPC_BestiaryGirl: I like vanilla {NPCName}
+	LikeBiome_Forest: I like vanilla {BiomeName}
+}
 
-# This will set the Princess' dialogue for your Town NPC.
-# You will need to change the name of your mod and name of your Town NPC for this to work.
-# TownNPCMood_Princess.LoveNPC_YourModHere/YourTownNPCHere
-# This key must be outside of the Mods.YourMod scope.
-TownNPCMood_Princess.LoveNPC_TownNPCGuide/TutorialTownNPC: "{$Mods.TownNPCGuide.NPCs.TutorialTownNPC.TownNPCMood.Princess_LovesNPC}"
+# Zoologist is a special case because she has a second set of dialogue when transformed.
+TownNPCMood_BestiaryGirl: {
+	LikeBiome_Forest: I like vanilla {BiomeName}
+	LikeNPC_Golfer: "{NPCName} is my brother, of course I like him!"
+}
+
+TownNPCMood_BestiaryGirlTransformed: {
+	LikeBiome_Forest: ME LIKE {BiomeName}
+	LikeNPC_Golfer: "{NPCName} BIG brother"
+}

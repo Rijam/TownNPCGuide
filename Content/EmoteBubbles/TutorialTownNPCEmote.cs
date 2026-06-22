@@ -3,7 +3,7 @@ using Terraria;
 using Terraria.GameContent.UI;
 using Terraria.ModLoader;
 
-namespace TownNPCGuide.EmoteBubbles
+namespace TownNPCGuide.Content.EmoteBubbles
 {
 	// This abstract class is used for town NPC emotes quick setup.
 	public abstract class ModTownEmote : ModEmoteBubble
@@ -57,4 +57,19 @@ namespace TownNPCGuide.EmoteBubbles
 		public override int Row => 2;
 	}
 	*/
+
+	public class TutorialTravelingMerchantEmote : ModTownEmote
+	{
+		public override int Row => 1;
+	}
+
+	public class TutorialSkeletonMerchantEmote : ModTownEmote
+	{
+		public override int Row => 2;
+	}
+
+	public class TutorialTownPetEmote : ModTownEmote
+	{
+		public override int Row => 3;
+	}
 }
