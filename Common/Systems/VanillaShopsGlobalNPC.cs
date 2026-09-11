@@ -49,7 +49,7 @@ namespace TownNPCGuide.Common.Systems
 			if (npc.type == NPCID.Angler)
 			{
 				// This an invalid shop. It will open an empty shop.
-				interactions.InsertBefore(NPCInteractions.Shop("BadShopName/Terraria/Merchant/Shop", "Shop"), NPCInteractionDatabase.CloseButton);
+				interactions.InsertBefore(NPCInteractions.Shop("BadShopName/Terraria/Merchant/Shop", "Bad Shop"), NPCInteractionDatabase.CloseButton);
 
 				// Find a button and disable it.
 				// interactions.Disable(interactions.Interactions.OfType<NPCInteractions.Actions.AnglerQuest>().FirstOrDefault());

@@ -311,8 +311,7 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs
 
 		// This hooks is where we register which buttons will show up when interacting the Town NPC.
 		// The "Close", "Happiness", and "Housing" buttons are automatically registered first.
-		public override void RegisterChatButtons(NPCInteractionList interactions)
-		{
+		public override void RegisterChatButtons(NPCInteractionList interactions) {
 			// Here we are registering our shop button before the close button.
 			interactions.InsertBefore(NPCInteractions.Shop(Shop1), NPCInteractionDatabase.CloseButton);
 			// NPCInteractionDatabase predefines CloseButton, HappinessButton, HousingButton, and PetButton.
@@ -345,7 +344,7 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs
 
 		// This a custom chat button that a modified copy of the NPCInteraction.Actions.OpenShop
 		// This button will only show up when it is day time.
-		// It will also be color.
+		// It will also be colored when hovering over it.
 		public class OpenShopDayOnly(string shopName, string customTextKey = null) : NPCInteraction
 		{
 			private string _shopName = shopName;
@@ -353,22 +352,19 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs
 
 			public override bool Condition() => Main.dayTime; // Make this button only show up during the day time.
 
-			public override string GetText()
-			{
+			public override string GetText() {
 				if (_customTextKey != null)
 					return Language.GetTextValue(_customTextKey);
 
 				return Lang.inter[28].Value;
 			}
 
-			public override void Interact()
-			{
+			public override void Interact() {
 				Main.instance.OpenShop(NPCShopDatabase.GetShopName(LocalPlayer.TalkNPC.type, _shopName));
 			}
 
 			// This hook lets you customize the color the chat button.
-			public override void TextColor(ref Color chatColor, ref Color chatColorShadow, bool hoveringOverButton)
-			{
+			public override void TextColor(ref Color chatColor, ref Color chatColorShadow, bool hoveringOverButton) {
 				if (hoveringOverButton)
 				{
 					// Set the color to orange when hovering over the button.
@@ -386,18 +382,16 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs
 			// Make this button only show up during the day time. Calling base is important just in case the parent class has its own condition.
 			public override bool Condition() => base.Condition() && Main.dayTime;
 
-			public override bool ShowExcalmation => true; // Makes the button have a small exclamation point next it.
+			public override bool ShowExcalmation => true; // Makes the button have a small exclamation point next to it.
 
 			// This hook lets you customize the color the chat button.
-			public override void TextColor(ref Color chatColor, ref Color chatColorShadow, bool hoveringOverButton)
-			{
+			public override void TextColor(ref Color chatColor, ref Color chatColorShadow, bool hoveringOverButton) {
 				// Set the color to black and the shadow to light gray.
 				// Multiply the color by * (Main.mouseTextColor / 255f) to give it that pulsating effect that text in Terraria has.
 				chatColor = Color.Black * (Main.mouseTextColor / 255f);
 				chatColorShadow = Color.LightGray;
 
-				if (hoveringOverButton)
-				{
+				if (hoveringOverButton) {
 					// Set the color to dark gray and the shadow to white when hovering over the button.
 					chatColor = Color.DarkGray * (Main.mouseTextColor / 255f);
 					chatColorShadow = Color.White;
@@ -406,8 +400,7 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs
 		}
 
 		// This hook lets you do things when chat buttons are clicked.
-		// public override void OnChatButtonClicked(NPCInteraction interaction)
-		// {
+		// public override void OnChatButtonClicked(NPCInteraction interaction) {
 			// Main.NewText($"Button {interaction.GetText()} was clicked from the ModNPC!");
 		// }
 
