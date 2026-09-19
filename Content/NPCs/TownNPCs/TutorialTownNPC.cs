@@ -382,7 +382,7 @@ namespace TownNPCGuide.Content.NPCs.TownNPCs
 			// Make this button only show up during the day time. Calling base is important just in case the parent class has its own condition.
 			public override bool Condition() => base.Condition() && Main.dayTime;
 
-			public override bool ShowExcalmation => true; // Makes the button have a small exclamation point next to it.
+			public override bool ShowExclamation => true; // Makes the button have a small exclamation point next to it.
 
 			// This hook lets you customize the color the chat button.
 			public override void TextColor(ref Color chatColor, ref Color chatColorShadow, bool hoveringOverButton) {
